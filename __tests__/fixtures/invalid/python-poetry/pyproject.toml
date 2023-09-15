@@ -1,0 +1,4 @@
+# This manifest defines the version in tool.poetry, instead of project
+[tool.poetry]
+name = "my-app"
+description = "This is my app"

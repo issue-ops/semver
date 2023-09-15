@@ -1,0 +1,19 @@
+{
+  "name": "semver",
+  "description": "Semantically version GitHub repository tags",
+  "version": "9.8.7",
+  "author": "Nick Alteen <ncalteen@github.com>",
+  "homepage": "https://github.com/issue-ops/semver#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/issue-ops/semver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/issue-ops/semver/issues"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "issueops"
+  ]
+}

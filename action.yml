@@ -1,0 +1,42 @@
+name: SemVer
+description: Handles the semantic versioning tags for a repository
+
+inputs:
+  ref:
+    description:
+      The Git ref to tag. This defaults to the base ref of the pull request.
+    required: false
+    default: ${{ github.base_ref }}
+  version:
+    description:
+      The version you want to explicitly set (e.g. '1.2.3-beta.4'). This must
+      follow SemVer standards! If not set, then `workspace` should be set so the
+      action can attempt to infer the version from the contents of the
+      repository.
+    required: false
+  workspace:
+    description:
+      The path where the repository has been cloned using the `actions/checkout`
+      step. If not set, then `version` should be set to an explicit version.
+    default: ${{ github.workspace }}
+    required: false
+
+outputs:
+  version:
+    description: The full semantic version (e.g. `1.2.3-alpha.4`)
+  major-minor-patch:
+    description: The major, minor, and patch versions (e.g. `1.2.3`)
+  major-minor:
+    description: The major and minor versions (e.g. `1.2`)
+  major:
+    description: The major version (e.g. `1` for `1.2.3`)
+  minor:
+    description: The minor version (e.g. `2` for `1.2.3`)
+  patch:
+    description: The patch version (e.g. `3` for `1.2.3`)
+  prerelease:
+    description: The prerelease version (e.g. `alpha.4`)
+
+runs:
+  using: node20
+  main: dist/index.js
