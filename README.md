@@ -114,9 +114,9 @@ If a repository has the following tag and commit structure:
 
 ```plain
 9807987 (HEAD)                    // Latest commit, no tags
-0123456 (tags: v2.1.0, v2.1, v2)  // Latest version for v2.x.x (major) and v2.1.x (minor)
-1243415 (tags: v2.0.0, v2.0)      // Latest version for v2.0.x (minor)
-9517391 (tags: v1.2.3, v1.2, v1)  // Latest version for v1.x.x (major) and v1.2.x (minor)
+0123456 (tags: v2.1.0, v2.1, v2)  // Latest for v2.x.x (major) / v2.1.x (minor)
+1243415 (tags: v2.0.0, v2.0)      // Latest for v2.0.x (minor)
+9517391 (tags: v1.2.3, v1.2, v1)  // Latest for v1.x.x (major) / v1.2.x (minor)
 ...
 ```
 
@@ -124,7 +124,7 @@ If the action is run with `version` set to `2.3.1` in `package.json`, the
 repository tags will be updated to:
 
 ```plain
-9807987 (tags: v2.3.1, v2.3, v2)  // v2 tag is moved, v2.3 and v2.3.1 tags are created
+9807987 (tags: v2.3.1, v2.3, v2)  // v2 tag moved, v2.3 / v2.3.1 tags created
 0123456 (tags: v2.1.0, v2.1)
 1243415 (tags: v2.0.0)
 9517391 (tags: v1.2.3, v1.2, v1)
