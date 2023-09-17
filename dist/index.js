@@ -8351,7 +8351,7 @@ class Version {
             // Create the tag locally
             core.info(`Creating tag locally: ${tag}`);
             tagOptions.reset();
-            await (0, exec_1.exec)(`git tag "${ref}" "${tag}"`, [], tagOptions.options);
+            await (0, exec_1.exec)(`git tag "${tag}" "${ref}"`, [], tagOptions.options);
             core.debug(`STDOUT: ${tagOptions.stdout}`);
             core.debug(`STDERR: ${tagOptions.stderr}`);
             // Git writes to stderr when tags are created successfully

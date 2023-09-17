@@ -219,7 +219,7 @@ export class Version {
       core.info(`Creating tag locally: ${tag}`)
       tagOptions.reset()
 
-      await exec(`git tag "${ref}" "${tag}"`, [], tagOptions.options)
+      await exec(`git tag "${tag}" "${ref}"`, [], tagOptions.options)
 
       core.debug(`STDOUT: ${tagOptions.stdout}`)
       core.debug(`STDERR: ${tagOptions.stderr}`)

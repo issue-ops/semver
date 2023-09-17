@@ -124,7 +124,7 @@ describe('version', () => {
           return Promise.resolve(0)
         }
 
-        if (commandLine === 'git tag "main" "v1.2.3-alpha.4"') {
+        if (commandLine === 'git tag "v1.2.3-alpha.4" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
         }
@@ -187,22 +187,22 @@ describe('version', () => {
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
-      'git tag "main" "v1.2.3-alpha.4"',
+      'git tag "v1.2.3-alpha.4" "main"',
       [],
       expect.any(Object)
     )
     expect(execMock).not.toHaveBeenCalledWith(
-      'git tag "main" "v1.2.3"',
+      'git tag "v1.2.3" "main"',
       [],
       expect.any(Object)
     )
     expect(execMock).not.toHaveBeenCalledWith(
-      'git tag "main" "v1.2"',
+      'git tag "v1.2" "main"',
       [],
       expect.any(Object)
     )
     expect(execMock).not.toHaveBeenCalledWith(
-      'git tag "main" "v1"',
+      'git tag "v1" "main"',
       [],
       expect.any(Object)
     )
@@ -318,7 +318,7 @@ describe('version', () => {
           return Promise.resolve(0)
         }
 
-        if (commandLine === 'git tag "main" "v1.2.3-alpha.4"') {
+        if (commandLine === 'git tag "v1.2.3-alpha.4" "main"') {
           return Promise.resolve(0)
         }
 
@@ -388,15 +388,15 @@ describe('version', () => {
           return Promise.resolve(0)
         }
 
-        if (commandLine === 'git tag "main" "v1.2.3"') {
+        if (commandLine === 'git tag "v1.2.3" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
         }
-        if (commandLine === 'git tag "main" "v1.2"') {
+        if (commandLine === 'git tag "v1.2" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
         }
-        if (commandLine === 'git tag "main" "v1"') {
+        if (commandLine === 'git tag "v1" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
         }
@@ -449,17 +449,17 @@ describe('version', () => {
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
-      'git tag "main" "v1.2.3"',
+      'git tag "v1.2.3" "main"',
       [],
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
-      'git tag "main" "v1.2"',
+      'git tag "v1.2" "main"',
       [],
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
-      'git tag "main" "v1"',
+      'git tag "v1" "main"',
       [],
       expect.any(Object)
     )
