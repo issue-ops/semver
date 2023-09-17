@@ -20,7 +20,8 @@ export class TagOptions {
         }
       },
       cwd: workspace,
-      silent: false
+      silent: false,
+      ignoreReturnCode: true
     }
   }
 
