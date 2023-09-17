@@ -8118,7 +8118,7 @@ class TagOptions {
                 }
             },
             cwd: workspace,
-            silent: true
+            silent: false
         };
     }
     /**
