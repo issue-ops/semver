@@ -10,15 +10,15 @@ export async function run() {
     (workspace === '' && versionInput === '') ||
     (workspace !== '' && versionInput !== '')
   ) {
-    core.setFailed('Either workspace or version must be defined')
+    core.setFailed('Must provide workspace OR version')
     return
   }
 
   core.info(`Ref: ${ref}`)
-  core.info(`Workspace: ${workspace}`)
-  core.info(`Input Version: ${versionInput}`)
+  if (workspace !== '') core.info(`Workspace: ${workspace}`)
+  if (versionInput !== '') core.info(`Version Input: ${versionInput}`)
 
-  // Get version from input, or infer it from the workspace
+  // Get version from input string, or infer it from the workspace
   const version: Version | undefined = versionInput
     ? new Version(versionInput)
     : Version.infer(workspace)
@@ -30,8 +30,11 @@ export async function run() {
 
   core.info(`Inferred Version: ${version.toString()}`)
 
-  // TODO: Set the verison tags
+  // Tag and push the version in the workspace
+  await version.tag(ref, workspace)
 
+  // Output the various version formats
+  // [X.Y.Z-PRE, X.Y.Z, X.Y, X, Y, Z, PRE]
   core.setOutput('version', version.toString(false))
   core.setOutput(
     'major-minor-patch',

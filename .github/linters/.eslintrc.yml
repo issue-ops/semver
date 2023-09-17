@@ -48,6 +48,7 @@ rules:
     'i18n-text/no-en': 'off',
     'import/no-commonjs': 'off',
     'import/no-namespace': 'off',
+    'jest/no-conditional-expect': 'off',
     'no-console': 'off',
     'prettier/prettier': 'error'
   }
