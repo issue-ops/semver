@@ -89,7 +89,7 @@ jobs:
 | `workspace` | The workspace where the repository was checked out           |
 |             | Defaults to `${{ github.workspace }}` for `actions/checkout` |
 
-> [!NOTE]
+> [!WARNING]
 >
 > Only `version` or `workspace` should be provided, not both!
 
@@ -110,23 +110,44 @@ The action outputs the following (assuming the version in the manifest file is
 
 ## Example
 
-If a repository has the following tag and commit structure:
+Assume a Node.js repository has the following tag and commit structure:
 
-```plain
-9807987 (HEAD)                    // Latest commit, no tags
-0123456 (tags: v2.1.0, v2.1, v2)  // Latest for v2.x.x (major) / v2.1.x (minor)
-1243415 (tags: v2.0.0, v2.0)      // Latest for v2.0.x (minor)
-9517391 (tags: v1.2.3, v1.2, v1)  // Latest for v1.x.x (major) / v1.2.x (minor)
-...
-```
+| Commit    | Tags                   | Notes                                |
+| --------- | ---------------------- | ------------------------------------ |
+| `9807987` |                        | Latest commit, no tags               |
+| `0123456` | `v2.1.0`, `v2.1`, `v2` | Latest `v2` (major) / `v2.1` (minor) |
+| `1243415` | `v2.0.0`, `v2.0`       | Latest `v2.0` (minor)                |
+| `9517391` | `v1.2.3`, `v1.2`, `v1` | Latest `v1` (major) / `v1.2` (minor) |
 
-If the action is run with `version` set to `2.3.1` in `package.json`, the
+### Prerelease Update
+
+If the action is run with `version` set to `2.3.1-alpha.1` in `package.json`,
+the repository tags will be updated to:
+
+| Commit    | Tags                   | Notes                                |
+| --------- | ---------------------- | ------------------------------------ |
+| `9807987` | `v2.3.1-alpha.1`       | Latest commit, with prerelease tag   |
+| `0123456` | `v2.1.0`, `v2.1`, `v2` | Latest `v2` (major) / `v2.1` (minor) |
+| `1243415` | `v2.0.0`, `v2.0`       | Latest `v2.0` (minor)                |
+| `9517391` | `v1.2.3`, `v1.2`, `v1` | Latest `v1` (major) / `v1.2` (minor) |
+
+> [!NOTE]
+>
+> In prerelease updates, existing major/minor/patch tags **are not** modified.
+
+## Major/Minor/Patch Update
+
+If the action is run with `version` set to `2.1.3` in `package.json`, the
 repository tags will be updated to:
 
-```plain
-9807987 (tags: v2.3.1, v2.3, v2)  // v2 tag moved, v2.3 / v2.3.1 tags created
-0123456 (tags: v2.1.0, v2.1)
-1243415 (tags: v2.0.0)
-9517391 (tags: v1.2.3, v1.2, v1)
-...
-```
+| Commit    | Tags                   | Notes                                |
+| --------- | ---------------------- | ------------------------------------ |
+| `9807987` | `v2.1.3`, `v2.1`, `v2` | Latest commit, no tags               |
+| `0123456` | `v2.1.0`               | Latest `v2` (major) / `v2.1` (minor) |
+| `1243415` | `v2.0.0`, `v2.0`       | Latest `v2.0` (minor)                |
+| `9517391` | `v1.2.3`, `v1.2`, `v1` | Latest `v1` (major) / `v1.2` (minor) |
+
+> [!NOTE]
+>
+> In major/minor/patch updates, existing major/minor/patch tags **are**
+> modified.
