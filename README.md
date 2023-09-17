@@ -61,12 +61,12 @@ jobs:
     if: ${{ github.event.pull_request.merged == true }}
 
     steps:
-      # Checkout the repository with fetch-depth set to 0 (get all tags)
+      # Checkout the repository with fetch-tags set to true
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-tags: true
 
       - name: Tag Commit
         id: tag-commit
