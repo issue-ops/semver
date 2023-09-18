@@ -8,6 +8,17 @@ import { Version } from '../src/version'
 // Mock the exec package
 jest.mock('@actions/exec')
 
+// Mock debug and info logging
+jest.mock('@actions/core', () => {
+  const actual = jest.requireActual('@actions/core')
+  return {
+    ...actual,
+    debug: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn()
+  }
+})
+
 describe('version', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -35,45 +46,54 @@ describe('version', () => {
   it('infers the version from valid manifests', async () => {
     // Pass each valid manifest file
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/java-pom`)?.toString()
+      Version.infer('./fixtures/valid/java/pom.xml', __dirname)?.toString()
     ).toEqual('8.0.0')
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/python`)?.toString()
+      Version.infer(
+        './fixtures/valid/python/pyproject.toml',
+        __dirname
+      )?.toString()
     ).toEqual('1.2.3')
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/python-poetry`)?.toString()
+      Version.infer(
+        './fixtures/valid/python-poetry/pyproject.toml',
+        __dirname
+      )?.toString()
     ).toEqual('3.4.5')
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/python-setup-cfg`)?.toString()
+      Version.infer('./fixtures/valid/python/setup.cfg', __dirname)?.toString()
     ).toEqual('7.8.9')
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/python-setup-py`)?.toString()
+      Version.infer('./fixtures/valid/python/setup.py', __dirname)?.toString()
     ).toEqual('5.6.0')
     expect(
-      Version.infer(`${__dirname}/fixtures/valid/node-package`)?.toString()
+      Version.infer('./fixtures/valid/node/package.json', __dirname)?.toString()
     ).toEqual('9.8.7')
   })
 
   it('does not infer the version from invalid manifests', async () => {
     // Pass each invalid manifest file
-    expect(Version.infer(`${__dirname}/fixtures/invalid/java-pom`)).toEqual(
-      undefined
-    )
-    expect(Version.infer(`${__dirname}/fixtures/invalid/python`)).toEqual(
+    expect(Version.infer('./fixtures/invalid/java/pom.xml', __dirname)).toEqual(
       undefined
     )
     expect(
-      Version.infer(`${__dirname}/fixtures/invalid/python-poetry`)
+      Version.infer('./fixtures/invalid/python/pyproject.toml', __dirname)
     ).toEqual(undefined)
     expect(
-      Version.infer(`${__dirname}/fixtures/invalid/python-setup-cfg`)
+      Version.infer(
+        './fixtures/invalid/python-poetry/pyproject.toml',
+        __dirname
+      )
     ).toEqual(undefined)
     expect(
-      Version.infer(`${__dirname}/fixtures/invalid/python-setup-py`)
+      Version.infer('./fixtures/invalid/python/setup.cfg', __dirname)
     ).toEqual(undefined)
-    expect(Version.infer(`${__dirname}/fixtures/invalid/node-package`)).toEqual(
-      undefined
-    )
+    expect(
+      Version.infer('./fixtures/invalid/python/setup.py', __dirname)
+    ).toEqual(undefined)
+    expect(
+      Version.infer('./fixtures/invalid/node/package.json', __dirname)
+    ).toEqual(undefined)
   })
 
   it('throws if a manifest file is not readable', async () => {
@@ -84,10 +104,51 @@ describe('version', () => {
 
     try {
       expect(
-        Version.infer(`${__dirname}/fixtures/invalid/unreadable`)
+        Version.infer('./fixtures/invalid/unreadable/package.json', __dirname)
       ).toThrow()
     } catch (error: any) {
       expect(error.message).toBe('File not readable')
+    }
+  })
+
+  it('returns undefined if a manifest file is not found', async () => {
+    // Mock the readFileSync function to throw an error
+    jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      // eslint-disable-next-line no-throw-literal
+      throw {
+        message: 'File not found',
+        code: 'ENOENT'
+      }
+    })
+
+    expect(
+      Version.infer('./fixtures/invalid/unreadable/package.json', __dirname)
+    ).toBe(undefined)
+  })
+
+  it('throws an error if a manifest path is invalid', async () => {
+    try {
+      expect(Version.infer('path/to/', __dirname)).toThrow()
+    } catch (error: any) {
+      expect(error.message).toBe('Invalid manifest path: path/to/')
+    }
+
+    try {
+      expect(Version.infer('///', __dirname)).toThrow()
+    } catch (error: any) {
+      expect(error.message).toBe('Invalid manifest path: //')
+    }
+
+    try {
+      expect(Version.infer('/', __dirname)).toThrow()
+    } catch (error: any) {
+      expect(error.message).toBe('Invalid manifest path: ')
+    }
+
+    try {
+      expect(Version.infer('', __dirname)).toThrow()
+    } catch (error: any) {
+      expect(error.message).toBe('Invalid manifest path: ')
     }
   })
 

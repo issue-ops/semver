@@ -5,9 +5,18 @@ import * as core from '@actions/core'
 import * as main from '../src/main'
 import { Version } from '../src/version'
 
-const getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
-const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
-const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
+// Mock debug and info logging
+jest.mock('@actions/core', () => {
+  const actual = jest.requireActual('@actions/core')
+  return {
+    ...actual,
+    debug: jest.fn(),
+    getInput: jest.fn(),
+    info: jest.fn(),
+    setFailed: jest.fn(),
+    setOutput: jest.fn()
+  }
+})
 
 const runMock = jest.spyOn(main, 'run')
 
@@ -16,44 +25,48 @@ describe('main', () => {
     jest.clearAllMocks()
   })
 
-  it('fails if both workspace and version are not set', async () => {
+  it('fails if both manifest-path and use-version are not set', async () => {
     // Return empty string for all inputs
-    getInputMock.mockImplementation((): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((): string => {
       return ''
     })
+    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     await main.run()
 
     expect(runMock).toHaveBeenCalled()
     expect(setFailedMock).toHaveBeenCalledWith(
-      'Must provide workspace OR version'
+      'Must provide manifest-path OR use-version'
     )
     expect(runMock).toHaveReturned()
   })
 
-  it('fails if both workspace and version are set', async () => {
+  it('fails if both manifest-path and use-version are set', async () => {
     // Return the same value for all inputs
-    getInputMock.mockImplementation((): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((): string => {
       return 'Set ALL THE INPUTS!'
     })
+    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     await main.run()
 
     expect(runMock).toHaveBeenCalled()
     expect(setFailedMock).toHaveBeenCalledWith(
-      'Must provide workspace OR version'
+      'Must provide manifest-path OR use-version'
     )
     expect(runMock).toHaveReturned()
   })
 
   it('gets the inputs', async () => {
     // Return valid values for all inputs
-    getInputMock.mockImplementation((name: string): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
-          return './fixtures/valid'
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
         default:
           return ''
       }
@@ -79,16 +92,19 @@ describe('main', () => {
 
   it('fails if a version could not be inferred', async () => {
     // Return valid values for all inputs
-    getInputMock.mockImplementation((name: string): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
-          return './fixtures/valid'
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
         default:
           return ''
       }
     })
+    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     // Mock the return value from Version.infer()
     jest.spyOn(Version, 'infer').mockReturnValue(undefined)
@@ -101,13 +117,17 @@ describe('main', () => {
   })
 
   it('infers a valid version', async () => {
+    const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
+
     // Return valid values for all inputs
-    getInputMock.mockImplementation((name: string): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
-          return './fixtures/valid'
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
         default:
           return ''
       }
@@ -128,31 +148,33 @@ describe('main', () => {
     await main.run()
 
     expect(runMock).toHaveBeenCalled()
-    expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3-alpha.4')
     expect(setOutputMock).toHaveBeenCalledWith('major-minor-patch', '1.2.3')
     expect(setOutputMock).toHaveBeenCalledWith('major-minor', '1.2')
     expect(setOutputMock).toHaveBeenCalledWith('major', '1')
     expect(setOutputMock).toHaveBeenCalledWith('minor', '2')
     expect(setOutputMock).toHaveBeenCalledWith('patch', '3')
     expect(setOutputMock).toHaveBeenCalledWith('prerelease', 'alpha.4')
+    expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3-alpha.4')
     expect(runMock).toHaveReturned()
   })
 
   it('creates a valid version', async () => {
+    const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
+
+    // Ignore the version.tag() call
+    jest.spyOn(Version.prototype, 'tag').mockImplementation()
+
     // Return valid values for all inputs
-    getInputMock.mockImplementation((name: string): string => {
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
         case 'ref':
           return 'refs/heads/main'
-        case 'version':
+        case 'use-version':
           return '1.2.3-alpha.4'
         default:
           return ''
       }
     })
-
-    // Ignore the version.tag() call
-    jest.spyOn(Version.prototype, 'tag').mockImplementation()
 
     await main.run()
 
