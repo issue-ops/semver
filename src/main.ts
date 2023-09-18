@@ -2,26 +2,29 @@ import * as core from '@actions/core'
 import { Version } from './version'
 
 export async function run() {
-  const ref = core.getInput('ref')
-  const workspace = core.getInput('workspace')
-  const versionInput = core.getInput('version')
+  const manifestPath: string = core.getInput('manifest-path')
+  const ref: string = core.getInput('ref')
+  const useVersion: string = core.getInput('use-version')
+  const workspace: string = core.getInput('workspace')
 
   if (
-    (workspace === '' && versionInput === '') ||
-    (workspace !== '' && versionInput !== '')
+    (manifestPath === '' && useVersion === '') ||
+    (manifestPath !== '' && useVersion !== '')
   ) {
-    core.setFailed('Must provide workspace OR version')
+    core.setFailed('Must provide manifest-path OR use-version')
     return
   }
 
-  core.info(`Ref: ${ref}`)
-  if (workspace !== '') core.info(`Workspace: ${workspace}`)
-  if (versionInput !== '') core.info(`Version Input: ${versionInput}`)
+  core.info('Running action with inputs:')
+  core.info(`\tRef: ${ref}`)
+  if (manifestPath !== '') core.info(`\tManifest Path: ${manifestPath}`)
+  if (useVersion !== '') core.info(`\tUse Version: ${useVersion}`)
+  if (workspace !== '') core.info(`\tWorkspace: ${workspace}`)
 
   // Get version from input string, or infer it from the workspace
-  const version: Version | undefined = versionInput
-    ? new Version(versionInput)
-    : Version.infer(workspace)
+  const version: Version | undefined = useVersion
+    ? new Version(useVersion)
+    : Version.infer(manifestPath, workspace)
 
   if (version === undefined) {
     core.setFailed('Could not infer version')
@@ -29,9 +32,12 @@ export async function run() {
   }
 
   core.info(`Inferred Version: ${version.toString()}`)
+  core.info(`Tagging ${ref} with version ${version.toString()}`)
 
   // Tag and push the version in the workspace
   await version.tag(ref, workspace)
+
+  core.info('Tagging complete')
 
   // Output the various version formats
   // [X.Y.Z-PRE, X.Y.Z, X.Y, X, Y, Z, PRE]

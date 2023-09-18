@@ -8053,30 +8053,36 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const version_1 = __nccwpck_require__(1946);
 async function run() {
+    const manifestPath = core.getInput('manifest-path');
     const ref = core.getInput('ref');
+    const useVersion = core.getInput('use-version');
     const workspace = core.getInput('workspace');
-    const versionInput = core.getInput('version');
-    if ((workspace === '' && versionInput === '') ||
-        (workspace !== '' && versionInput !== '')) {
-        core.setFailed('Must provide workspace OR version');
+    if ((manifestPath === '' && useVersion === '') ||
+        (manifestPath !== '' && useVersion !== '')) {
+        core.setFailed('Must provide manifest-path OR use-version');
         return;
     }
-    core.info(`Ref: ${ref}`);
+    core.info('Running action with inputs:');
+    core.info(`\tRef: ${ref}`);
+    if (manifestPath !== '')
+        core.info(`\tManifest Path: ${manifestPath}`);
+    if (useVersion !== '')
+        core.info(`\tUse Version: ${useVersion}`);
     if (workspace !== '')
-        core.info(`Workspace: ${workspace}`);
-    if (versionInput !== '')
-        core.info(`Version Input: ${versionInput}`);
+        core.info(`\tWorkspace: ${workspace}`);
     // Get version from input string, or infer it from the workspace
-    const version = versionInput
-        ? new version_1.Version(versionInput)
-        : version_1.Version.infer(workspace);
+    const version = useVersion
+        ? new version_1.Version(useVersion)
+        : version_1.Version.infer(manifestPath, workspace);
     if (version === undefined) {
         core.setFailed('Could not infer version');
         return;
     }
     core.info(`Inferred Version: ${version.toString()}`);
+    core.info(`Tagging ${ref} with version ${version.toString()}`);
     // Tag and push the version in the workspace
     await version.tag(ref, workspace);
+    core.info('Tagging complete');
     // Output the various version formats
     // [X.Y.Z-PRE, X.Y.Z, X.Y, X, Y, Z, PRE]
     core.setOutput('version', version.toString(false));
@@ -8205,7 +8211,7 @@ class Version {
         // Split the version into major, minor, and patch
         const splitVersion = version.split('.');
         core.info(`Split version: ${JSON.stringify(splitVersion)}`);
-        // Some frameworks just don't add minor/patch versions (e.g. 1.0, or 1)
+        // Some frameworks just don't add minor/patch versions (e.g. `1` or `1.0`)
         this.major = splitVersion[0];
         this.minor = splitVersion[1] ? splitVersion[1] : '0';
         this.patch = splitVersion[2] ? splitVersion[2] : '0';
@@ -8235,75 +8241,66 @@ class Version {
     }
     /**
      * Infer the version from the project workspace
+     * Supported manifest files:
+     * - Node.js: package.json
+     * - Python: pyproject.toml, setup.cfg, setup.py
+     * - Java: pom.xml
+     * TODO: C#, C++, Go, Rust, Ruby, Swift, etc.
      *
+     * @param manifestPath The path to the manifest file
      * @param workspace The project workspace
      * @returns The version instance
      */
-    static infer(workspace) {
-        // Supported manifest files
-        // Node.js: package.json
-        // Python: pyproject.toml, setup.cfg, setup.py
-        // Java: pom.xml
-        // TODO: C#, C++, Go, Rust, Ruby, Swift, etc.
-        let version = undefined;
-        const manifests = [
-            'package.json',
-            'pyproject.toml',
-            'setup.cfg',
-            'setup.py',
-            'pom.xml'
-        ];
-        // Remove trailing slashes from workspace
+    static infer(manifestPath, workspace) {
+        // Remove leading/trailing slashes from workspace and manifest path
         workspace = workspace.replace(/\/$/, '');
-        for (const manifest of manifests) {
-            core.info(`Reading manifest: ${workspace}/${manifest}`);
-            try {
-                // Read the manifest file
-                const body = fs_1.default.readFileSync(`${workspace}/${manifest}`, 'utf8');
-                switch (manifest) {
-                    case 'package.json':
-                        // Node.js package.json can just be read and parsed
-                        version = JSON.parse(body).version;
-                        break;
-                    case 'pyproject.toml': {
-                        // Python pyproject.toml can specify the version in different places
-                        // based on the type of project.
-                        // Default -> `project.version`
-                        // Poetry -> `tool.poetry.version`
-                        const tomlBody = toml.parse(body);
-                        version =
-                            tomlBody.project?.version || tomlBody.tool?.poetry?.version;
-                        break;
-                    }
-                    case 'setup.cfg':
-                        // Python setup.cfg specifies version as: `version = 5.6`
-                        version = body.match(/version\s?=\s?['"]?(?<version>[^'"\n]+)/)
-                            ?.groups?.version;
-                        break;
-                    case 'setup.py':
-                        // Python setup.py specifies version as: `version="5.6",`
-                        version = body.match(/version\s?=\s?['"](?<version>[^'"\r\n]+)['"],?/)?.groups?.version;
-                        break;
-                    case 'pom.xml':
-                        // Java pom.xml specifies version as: `<version>5.6</version>`
-                        version = body.match(/<version>(?<version>[^<]+)/)?.groups?.version;
-                        break;
-                }
-                core.info(`Inferred version: ${version}`);
+        manifestPath = manifestPath.replace(/^\//, '');
+        // Get the file name and extension from the manifest path
+        const items = manifestPath.split('/');
+        const manifestFile = items[items.length - 1];
+        core.info(`Manifest file: ${manifestFile}`);
+        if (manifestFile === '')
+            throw new Error(`Invalid manifest path: ${manifestPath}`);
+        // Functions for parsing each type of manifest file
+        // eslint-disable-next-line no-unused-vars
+        const parser = {
+            'package.json': (body) => {
+                return JSON.parse(body).version;
+            },
+            'pyproject.toml': (body) => {
+                const tomlBody = toml.parse(body);
+                return tomlBody.project?.version || tomlBody.tool?.poetry?.version;
+            },
+            'setup.cfg': (body) => {
+                return body.match(/version\s?=\s?['"]?(?<version>[^'"\n]+)/)?.groups
+                    ?.version;
+            },
+            'setup.py': (body) => {
+                return body.match(/version\s?=\s?['"](?<version>[^'"\r\n]+)['"],?/)
+                    ?.groups?.version;
+            },
+            'pom.xml': (body) => {
+                return body.match(/<version>(?<version>[^<]+)/)?.groups?.version;
             }
-            catch (error) {
-                // Ignore file not found errors
-                if (error.code === 'ENOENT') {
-                    core.info('Manifest not found');
-                }
-                else {
-                    throw error;
-                }
+        };
+        try {
+            core.info(`Reading manifest: ${workspace}/${manifestPath}`);
+            const body = fs_1.default.readFileSync(`${workspace}/${manifestPath}`, 'utf8');
+            const version = parser[manifestFile]?.(body);
+            core.info(`Inferred version: ${version}`);
+            // Return undefined if no version was found, otherwise return a new
+            // instance of the Version class
+            return version === undefined ? undefined : new Version(version);
+        }
+        catch (error) {
+            if (error.code === 'ENOENT') {
+                core.error('Manifest not found');
+                return undefined;
+            }
+            else {
+                throw error;
             }
         }
-        // Return undefined if no version was found, otherwise return a new instance
-        // of the Version class
-        return version === undefined ? undefined : new Version(version);
     }
     /**
      * Tag the ref with the inferred version tags

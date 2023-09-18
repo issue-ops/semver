@@ -41,7 +41,7 @@ export class Version {
     const splitVersion = version.split('.')
     core.info(`Split version: ${JSON.stringify(splitVersion)}`)
 
-    // Some frameworks just don't add minor/patch versions (e.g. 1.0, or 1)
+    // Some frameworks just don't add minor/patch versions (e.g. `1` or `1.0`)
     this.major = splitVersion[0]
     this.minor = splitVersion[1] ? splitVersion[1] : '0'
     this.patch = splitVersion[2] ? splitVersion[2] : '0'
@@ -79,82 +79,71 @@ export class Version {
 
   /**
    * Infer the version from the project workspace
+   * Supported manifest files:
+   * - Node.js: package.json
+   * - Python: pyproject.toml, setup.cfg, setup.py
+   * - Java: pom.xml
+   * TODO: C#, C++, Go, Rust, Ruby, Swift, etc.
    *
+   * @param manifestPath The path to the manifest file
    * @param workspace The project workspace
    * @returns The version instance
    */
-  static infer(workspace: string): Version | undefined {
-    // Supported manifest files
-    // Node.js: package.json
-    // Python: pyproject.toml, setup.cfg, setup.py
-    // Java: pom.xml
-    // TODO: C#, C++, Go, Rust, Ruby, Swift, etc.
-    let version: string | undefined = undefined
-
-    const manifests = [
-      'package.json',
-      'pyproject.toml',
-      'setup.cfg',
-      'setup.py',
-      'pom.xml'
-    ]
-
-    // Remove trailing slashes from workspace
+  static infer(manifestPath: string, workspace: string): Version | undefined {
+    // Remove leading/trailing slashes from workspace and manifest path
     workspace = workspace.replace(/\/$/, '')
+    manifestPath = manifestPath.replace(/^\//, '')
 
-    for (const manifest of manifests) {
-      core.info(`Reading manifest: ${workspace}/${manifest}`)
+    // Get the file name and extension from the manifest path
+    const items: string[] = manifestPath.split('/')
+    const manifestFile: string = items[items.length - 1]
+    core.info(`Manifest file: ${manifestFile}`)
 
-      try {
-        // Read the manifest file
-        const body = fs.readFileSync(`${workspace}/${manifest}`, 'utf8')
+    if (manifestFile === '')
+      throw new Error(`Invalid manifest path: ${manifestPath}`)
 
-        switch (manifest) {
-          case 'package.json':
-            // Node.js package.json can just be read and parsed
-            version = JSON.parse(body).version
-            break
-          case 'pyproject.toml': {
-            // Python pyproject.toml can specify the version in different places
-            // based on the type of project.
-            // Default -> `project.version`
-            // Poetry -> `tool.poetry.version`
-            const tomlBody = toml.parse(body)
-            version =
-              tomlBody.project?.version || tomlBody.tool?.poetry?.version
-            break
-          }
-          case 'setup.cfg':
-            // Python setup.cfg specifies version as: `version = 5.6`
-            version = body.match(/version\s?=\s?['"]?(?<version>[^'"\n]+)/)
-              ?.groups?.version
-            break
-          case 'setup.py':
-            // Python setup.py specifies version as: `version="5.6",`
-            version = body.match(
-              /version\s?=\s?['"](?<version>[^'"\r\n]+)['"],?/
-            )?.groups?.version
-            break
-          case 'pom.xml':
-            // Java pom.xml specifies version as: `<version>5.6</version>`
-            version = body.match(/<version>(?<version>[^<]+)/)?.groups?.version
-            break
-        }
-
-        core.info(`Inferred version: ${version}`)
-      } catch (error: any) {
-        // Ignore file not found errors
-        if (error.code === 'ENOENT') {
-          core.info('Manifest not found')
-        } else {
-          throw error
-        }
+    // Functions for parsing each type of manifest file
+    // eslint-disable-next-line no-unused-vars
+    const parser: { [k: string]: (body: string) => string | undefined } = {
+      'package.json': (body: string): string | undefined => {
+        return JSON.parse(body).version
+      },
+      'pyproject.toml': (body: string): string | undefined => {
+        const tomlBody = toml.parse(body)
+        return tomlBody.project?.version || tomlBody.tool?.poetry?.version
+      },
+      'setup.cfg': (body: string): string | undefined => {
+        return body.match(/version\s?=\s?['"]?(?<version>[^'"\n]+)/)?.groups
+          ?.version
+      },
+      'setup.py': (body: string): string | undefined => {
+        return body.match(/version\s?=\s?['"](?<version>[^'"\r\n]+)['"],?/)
+          ?.groups?.version
+      },
+      'pom.xml': (body: string): string | undefined => {
+        return body.match(/<version>(?<version>[^<]+)/)?.groups?.version
       }
     }
 
-    // Return undefined if no version was found, otherwise return a new instance
-    // of the Version class
-    return version === undefined ? undefined : new Version(version)
+    try {
+      core.info(`Reading manifest: ${workspace}/${manifestPath}`)
+
+      const body = fs.readFileSync(`${workspace}/${manifestPath}`, 'utf8')
+      const version = parser[manifestFile]?.(body)
+
+      core.info(`Inferred version: ${version}`)
+
+      // Return undefined if no version was found, otherwise return a new
+      // instance of the Version class
+      return version === undefined ? undefined : new Version(version)
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        core.error('Manifest not found')
+        return undefined
+      } else {
+        throw error
+      }
+    }
   }
 
   /**
