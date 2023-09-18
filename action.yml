@@ -2,28 +2,34 @@ name: SemVer
 description: Handles the semantic versioning tags for a repository
 
 inputs:
-  ref:
+  manifest-path:
+    default: package.json
     description:
-      The Git ref to tag. This defaults to the base ref of the pull request.
+      The path to the manifest file that contains the version information,
+      relative to the root of the repository. If not set, then `version` should
+      be set to an explicit version in SemVer 2.0 format.
     required: false
+  ref:
     default: ${{ github.base_ref }}
-  version:
     description:
-      The version you want to explicitly set (e.g. '1.2.3-beta.4'). This must
-      follow SemVer standards! If not set, then `workspace` should be set so the
-      action can attempt to infer the version from the contents of the
-      repository.
+      The Git ref to tag with the specified or inferred version. This defaults
+      to the base ref of a pull request event trigger.
+    required: false
+  use-version:
+    description:
+      The version you want to explicitly use (e.g. '1.2.3-beta.4+build.5'). This
+      must follow SemVer standards. If not set, then `manifest-path` should be
+      set so the action can attempt to infer the version from the contents of
+      the repository.
     required: false
   workspace:
+    default: ${{ github.workspace }}
     description:
       The path where the repository has been cloned using the `actions/checkout`
       step. If not set, then `version` should be set to an explicit version.
-    default: ${{ github.workspace }}
     required: false
 
 outputs:
-  version:
-    description: The full semantic version (e.g. `1.2.3-alpha.4`)
   major-minor-patch:
     description: The major, minor, and patch versions (e.g. `1.2.3`)
   major-minor:
@@ -36,6 +42,8 @@ outputs:
     description: The patch version (e.g. `3` for `1.2.3`)
   prerelease:
     description: The prerelease version (e.g. `alpha.4`)
+  version:
+    description: The full semantic version (e.g. `1.2.3-alpha.4`)
 
 runs:
   using: node20
