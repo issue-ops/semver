@@ -1,4 +1,4 @@
-name: SemVer
+name: Semantic Version Manager
 description: Handles the semantic versioning tags for a repository
 
 inputs:
