@@ -72,6 +72,7 @@ jobs:
         id: tag-commit
         uses: issue-ops/semver@vX.X.X
         with:
+          manifest-path: package.json
           workspace: ${{ github.workspace }}
           ref: main
 
@@ -81,17 +82,18 @@ jobs:
 
 ## Inputs
 
-| Input       | Description                                                  |
-| ----------- | ------------------------------------------------------------ |
-| `ref`       | The Git ref to tag                                           |
-|             | Defaults to `${{ github.base_ref }}`                         |
-| `version`   | A specific version to parse and return                       |
-| `workspace` | The workspace where the repository was checked out           |
-|             | Defaults to `${{ github.workspace }}` for `actions/checkout` |
-
-> [!WARNING]
->
-> Only `version` or `workspace` should be provided, not both!
+| Input           | Description                                                |
+| --------------- | ---------------------------------------------------------- |
+| `manifest-path` | The path to the manifest file that contains the version.   |
+|                 | Relative to the root of the repository.                    |
+|                 | If not set, `use-version` must be set.                     |
+| `ref`           | The Git ref to tag with the specified or inferred version. |
+|                 | Defaults to the base ref of a pull request event trigger.  |
+| `use-version`   | The version you want to explicitly use.                    |
+|                 | This must follow SemVer 2.0 standards.                     |
+|                 | If not set, `manifest-path` must be set.                   |
+| `workspace`     | The path where the repository has been cloned.             |
+|                 | Default: `${{ github.workspace }}` for `actions/checkout`. |
 
 ## Outputs
 
