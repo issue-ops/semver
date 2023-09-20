@@ -3,6 +3,7 @@
 [![Check dist/](https://github.com/issue-ops/semver/actions/workflows/check-dist.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/check-dist.yml)
 [![CodeQL](https://github.com/issue-ops/semver/actions/workflows/codeql.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/codeql.yml)
 [![Continuous Integration](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml)
+[![Continuous Delivery](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml)
 [![Super Linter](https://github.com/issue-ops/semver/actions/workflows/super-linter.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/super-linter.yml)
 [![Code Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
