@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches-ignore:
+    branches:
       - main
   pull_request:
     branches:
@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      actions: read
+      checks: write
       contents: read
       statuses: write
 
@@ -44,3 +46,11 @@ jobs:
       - name: Test
         id: test
         run: npm run ci-test
+
+      - name: Report Tests
+        id: report
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Report
+          path: reports/jest-*.xml
+          reporter: jest-junit
