@@ -21,6 +21,7 @@ ignorePatterns:
   - '**/coverage/**'
   - '**/.github/**'
   - '**/.vscode/**'
+  - '*.json'
 
 parserOptions:
   ecmaVersion: 2023
