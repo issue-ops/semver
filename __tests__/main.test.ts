@@ -18,11 +18,17 @@ jest.mock('@actions/core', () => {
   }
 })
 
-const runMock = jest.spyOn(main, 'run')
+let runMock: jest.SpyInstance
+let setFailedMock: jest.SpyInstance
+let setOutputMock: jest.SpyInstance
 
 describe('main', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+
+    runMock = jest.spyOn(main, 'run')
+    setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
+    setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
   })
 
   it('fails if both manifest-path and use-version are not set', async () => {
@@ -30,7 +36,6 @@ describe('main', () => {
     jest.spyOn(core, 'getInput').mockImplementation((): string => {
       return ''
     })
-    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     await main.run()
 
@@ -46,7 +51,6 @@ describe('main', () => {
     jest.spyOn(core, 'getInput').mockImplementation((): string => {
       return 'Set ALL THE INPUTS!'
     })
-    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     await main.run()
 
@@ -104,7 +108,6 @@ describe('main', () => {
           return ''
       }
     })
-    const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
 
     // Mock the return value from Version.infer()
     jest.spyOn(Version, 'infer').mockReturnValue(undefined)
@@ -117,8 +120,6 @@ describe('main', () => {
   })
 
   it('infers a valid version', async () => {
-    const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
-
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
@@ -159,8 +160,6 @@ describe('main', () => {
   })
 
   it('creates a valid version', async () => {
-    const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
-
     // Ignore the version.tag() call
     jest.spyOn(Version.prototype, 'tag').mockImplementation()
 
