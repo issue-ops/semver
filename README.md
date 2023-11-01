@@ -8,7 +8,8 @@
 [![Code Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
 Gets the [Semantic Version](https://semver.org/) of a repository based on the
-type of manifest file located. This action currently supports the following:
+type of manifest file located. This action currently supports the following
+manifests:
 
 | Language | Manifest File    |
 | -------- | ---------------- |
