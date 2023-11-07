@@ -13,6 +13,12 @@ inputs:
       relative to the root of the repository. If not set, then `version` should
       be set to an explicit version in SemVer 2.0 format.
     required: false
+  overwrite:
+    default: 'false'
+    description:
+      If tags already exist for the specified or inferred version, setting this
+      to 'true' will overwrite them. Defaults to 'false'.
+    required: false
   ref:
     default: ${{ github.base_ref }}
     description:
