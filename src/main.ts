@@ -34,8 +34,7 @@ export async function run() {
 
   // Check if the tags already exist in the repository.
   if (!overwrite && (await version.exists(workspace))) {
-    core.error("Version already exists and 'overwrite' is false")
-    core.setFailed('Version already exists')
+    core.setFailed("Version already exists and 'overwrite' is false")
     return
   }
 
