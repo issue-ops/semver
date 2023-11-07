@@ -13,6 +13,7 @@ jest.mock('@actions/core', () => {
     debug: jest.fn(),
     getInput: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
     setFailed: jest.fn(),
     setOutput: jest.fn()
   }
