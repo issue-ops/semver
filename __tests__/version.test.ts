@@ -24,6 +24,11 @@ describe('version', () => {
     jest.clearAllMocks()
   })
 
+  it('removes a leading "v"', async () => {
+    expect(new Version('v1.2.3-alpha.4').major).toEqual('1')
+    expect(new Version('V1.2.3-alpha.4').major).toEqual('1')
+  })
+
   it('fails if an invalid version string was passed to the constructor', async () => {
     try {
       // Pass an invalid version

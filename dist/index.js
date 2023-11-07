@@ -8202,6 +8202,8 @@ class Version {
      */
     constructor(version) {
         core.info(`Input version string: ${version}`);
+        if (version.startsWith('v') || version.startsWith('V'))
+            version = version.slice(1);
         // Build metadata is separated by a `+`
         // https://semver.org/#spec-item-10
         // TODO: Would we eventually want to support this?
