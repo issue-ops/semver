@@ -8054,6 +8054,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const version_1 = __nccwpck_require__(1946);
 async function run() {
     const manifestPath = core.getInput('manifest-path');
+    const overwrite = core.getInput('overwrite') === 'true';
     const ref = core.getInput('ref');
     const useVersion = core.getInput('use-version');
     const workspace = core.getInput('workspace');
@@ -8076,6 +8077,12 @@ async function run() {
         : version_1.Version.infer(manifestPath, workspace);
     if (version === undefined) {
         core.setFailed('Could not infer version');
+        return;
+    }
+    // Check if the tags already exist in the repository.
+    if (!overwrite && (await version.exists(workspace))) {
+        core.error("Version already exists and 'overwrite' is false");
+        core.setFailed('Version already exists');
         return;
     }
     core.info(`Inferred Version: ${version.toString()}`);
@@ -8365,6 +8372,27 @@ class Version {
         // Ignore stderr if the tag was pushed
         if (tagOptions.stderr.includes('[new tag]') === false)
             throw new Error(tagOptions.stderr);
+    }
+    /**
+     * Checks if the version tags already exist in the repository
+     *
+     * @param manifestPath The path to the manifest file
+     * @param workspace The project workspace
+     * @returns True if the version tags exist, otherwise false
+     */
+    async exists(workspace) {
+        // There's no need to check for anything other than the "full" tag (with the
+        // prerelease, if present). The major.minor or major tags may exist and can
+        // be moved.
+        core.info(`Checking for tag: v${this.toString(true)}`);
+        const tagOptions = new options_1.TagOptions(workspace);
+        await (0, exec_1.exec)(`git tag -l "${this.toString(true)}"`, [], tagOptions.options);
+        core.debug(`STDOUT: ${tagOptions.stdout}`);
+        core.debug(`STDERR: ${tagOptions.stderr}`);
+        if (tagOptions.stdout.includes(this.toString(true)))
+            return true;
+        else
+            return false;
     }
 }
 exports.Version = Version;
