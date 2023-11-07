@@ -13,6 +13,7 @@ jest.mock('@actions/core', () => {
     debug: jest.fn(),
     getInput: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
     setFailed: jest.fn(),
     setOutput: jest.fn()
   }
@@ -71,6 +72,8 @@ describe('main', () => {
           return '.'
         case 'manifest-path':
           return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'true'
         default:
           return ''
       }
@@ -83,7 +86,8 @@ describe('main', () => {
       patch: '3',
       prerelease: 'alpha.4',
       toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
-      tag: jest.fn()
+      tag: jest.fn(),
+      exists: jest.fn().mockImplementation(() => false)
     } as Version
 
     jest.spyOn(Version, 'infer').mockReturnValue(mockVersion)
@@ -104,6 +108,8 @@ describe('main', () => {
           return '.'
         case 'manifest-path':
           return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'true'
         default:
           return ''
       }
@@ -129,6 +135,8 @@ describe('main', () => {
           return '.'
         case 'manifest-path':
           return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'true'
         default:
           return ''
       }
@@ -141,7 +149,8 @@ describe('main', () => {
       patch: '3',
       prerelease: 'alpha.4',
       toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
-      tag: jest.fn()
+      tag: jest.fn(),
+      exists: jest.fn().mockImplementation(() => false)
     } as Version
 
     jest.spyOn(Version, 'infer').mockReturnValue(mockVersion)
@@ -170,6 +179,8 @@ describe('main', () => {
           return 'refs/heads/main'
         case 'use-version':
           return '1.2.3-alpha.4'
+        case 'overwrite':
+          return 'true'
         default:
           return ''
       }
@@ -185,6 +196,43 @@ describe('main', () => {
     expect(setOutputMock).toHaveBeenCalledWith('minor', '2')
     expect(setOutputMock).toHaveBeenCalledWith('patch', '3')
     expect(setOutputMock).toHaveBeenCalledWith('prerelease', 'alpha.4')
+    expect(runMock).toHaveReturned()
+  })
+
+  it('fails if the version exists', async () => {
+    // Return valid values for all inputs
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
+      switch (name) {
+        case 'ref':
+          return 'refs/heads/main'
+        case 'workspace':
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'false'
+        default:
+          return ''
+      }
+    })
+
+    // Mock the return value from Version.infer()
+    const mockVersion = {
+      major: '1',
+      minor: '2',
+      patch: '3',
+      prerelease: 'alpha.4',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      tag: jest.fn(),
+      exists: jest.fn().mockImplementation(() => true)
+    } as Version
+
+    jest.spyOn(Version, 'infer').mockReturnValue(mockVersion)
+
+    await main.run()
+
+    expect(runMock).toHaveBeenCalled()
+    expect(setFailedMock).toHaveBeenCalled()
     expect(runMock).toHaveReturned()
   })
 })

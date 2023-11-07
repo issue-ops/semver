@@ -88,6 +88,8 @@ jobs:
 | `manifest-path` | The path to the manifest file that contains the version.   |
 |                 | Relative to the root of the repository.                    |
 |                 | If not set, `use-version` must be set.                     |
+| `overwrite`     | Set to `'true'` for the action to overwrite existing tags. |
+|                 | Default: `'false'`                                         |
 | `ref`           | The Git ref to tag with the specified or inferred version. |
 |                 | Defaults to the base ref of a pull request event trigger.  |
 | `use-version`   | The version you want to explicitly use.                    |
@@ -110,6 +112,13 @@ The action outputs the following (assuming the version in the manifest file is
 | `minor`             | The minor version                    | `2`             |
 | `patch`             | The patch version                    | `3`             |
 | `prerelease`        | The prerelease version               | `alpha.4`       |
+
+## Errors
+
+If the `overwrite` parameter is `'false'` (the default value), this action will
+fail if there is an existing version tag in the repository that matches the
+inferred or provided version. This is to prevent releases from overwriting one
+another.
 
 ## Example
 

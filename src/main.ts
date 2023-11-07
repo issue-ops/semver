@@ -3,6 +3,7 @@ import { Version } from './version'
 
 export async function run() {
   const manifestPath: string = core.getInput('manifest-path')
+  const overwrite: boolean = core.getInput('overwrite') === 'true'
   const ref: string = core.getInput('ref')
   const useVersion: string = core.getInput('use-version')
   const workspace: string = core.getInput('workspace')
@@ -31,12 +32,17 @@ export async function run() {
     return
   }
 
+  // Check if the tags already exist in the repository.
+  if (!overwrite && (await version.exists(workspace))) {
+    core.setFailed("Version already exists and 'overwrite' is false")
+    return
+  }
+
   core.info(`Inferred Version: ${version.toString()}`)
   core.info(`Tagging ${ref} with version ${version.toString()}`)
 
   // Tag and push the version in the workspace
   await version.tag(ref, workspace)
-
   core.info('Tagging complete')
 
   // Output the various version formats
