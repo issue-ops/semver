@@ -6,6 +6,12 @@ branding:
   color: blue
 
 inputs:
+  check-only:
+    default: 'false'
+    description:
+      If set to 'true', the action will only check if the version exists and, if
+      so, will fail. Defaults to 'false'.
+    required: false
   manifest-path:
     description:
       The path to the manifest file that contains the version information,
