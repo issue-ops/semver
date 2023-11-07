@@ -85,6 +85,9 @@ jobs:
 
 | Input           | Description                                                |
 | --------------- | ---------------------------------------------------------- |
+| `check-only`    | If set to `'true'`, only checks if the version exists.     |
+|                 | Causes the action to fail if the version already exists.   |
+|                 | Default: `'false'`                                         |
 | `manifest-path` | The path to the manifest file that contains the version.   |
 |                 | Relative to the root of the repository.                    |
 |                 | If not set, `use-version` must be set.                     |
