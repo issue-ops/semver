@@ -7,7 +7,6 @@ branding:
 
 inputs:
   manifest-path:
-    default: package.json
     description:
       The path to the manifest file that contains the version information,
       relative to the root of the repository. If not set, then `version` should
