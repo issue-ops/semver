@@ -19,6 +19,7 @@ jest.mock('@actions/core', () => {
   }
 })
 
+let infoMock: jest.SpyInstance
 let runMock: jest.SpyInstance
 let setFailedMock: jest.SpyInstance
 let setOutputMock: jest.SpyInstance
@@ -27,6 +28,7 @@ describe('main', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    infoMock = jest.spyOn(core, 'info').mockImplementation()
     runMock = jest.spyOn(main, 'run')
     setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
     setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
@@ -66,6 +68,8 @@ describe('main', () => {
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
+        case 'check-only':
+          return 'false'
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
@@ -102,6 +106,8 @@ describe('main', () => {
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
+        case 'check-only':
+          return 'false'
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
@@ -129,6 +135,8 @@ describe('main', () => {
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
+        case 'check-only':
+          return 'false'
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
@@ -175,6 +183,8 @@ describe('main', () => {
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
+        case 'check-only':
+          return 'false'
         case 'ref':
           return 'refs/heads/main'
         case 'use-version':
@@ -199,10 +209,12 @@ describe('main', () => {
     expect(runMock).toHaveReturned()
   })
 
-  it('fails if the version exists', async () => {
+  it('fails if the version exists and overwrite is false', async () => {
     // Return valid values for all inputs
     jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
       switch (name) {
+        case 'check-only':
+          return 'false'
         case 'ref':
           return 'refs/heads/main'
         case 'workspace':
@@ -232,7 +244,92 @@ describe('main', () => {
     await main.run()
 
     expect(runMock).toHaveBeenCalled()
-    expect(setFailedMock).toHaveBeenCalled()
+    expect(setFailedMock).toHaveBeenCalledWith(
+      "Version already exists and 'overwrite' is false"
+    )
+    expect(runMock).toHaveReturned()
+  })
+
+  it('fails if the version exists and check-only is true', async () => {
+    // Return valid values for all inputs
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
+      switch (name) {
+        case 'check-only':
+          return 'true'
+        case 'ref':
+          return 'refs/heads/main'
+        case 'workspace':
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'false'
+        default:
+          return ''
+      }
+    })
+
+    // Mock the return value from Version.infer()
+    const mockVersion = {
+      major: '1',
+      minor: '2',
+      patch: '3',
+      prerelease: 'alpha.4',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      tag: jest.fn(),
+      exists: jest.fn().mockImplementation(() => true)
+    } as Version
+
+    jest.spyOn(Version, 'infer').mockReturnValue(mockVersion)
+
+    await main.run()
+
+    expect(runMock).toHaveBeenCalled()
+    expect(setFailedMock).toHaveBeenCalledWith(
+      "Version already exists and 'check-only' is true"
+    )
+    expect(runMock).toHaveReturned()
+  })
+
+  it('passes if the version exists and check-only is false', async () => {
+    // Return valid values for all inputs
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
+      switch (name) {
+        case 'check-only':
+          return 'true'
+        case 'ref':
+          return 'refs/heads/main'
+        case 'workspace':
+          return '.'
+        case 'manifest-path':
+          return '/fixtures/valid/node/package.json'
+        case 'overwrite':
+          return 'false'
+        default:
+          return ''
+      }
+    })
+
+    // Mock the return value from Version.infer()
+    const mockVersion = {
+      major: '1',
+      minor: '2',
+      patch: '3',
+      prerelease: 'alpha.4',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      tag: jest.fn(),
+      exists: jest.fn().mockImplementation(() => false)
+    } as Version
+
+    jest.spyOn(Version, 'infer').mockReturnValue(mockVersion)
+
+    await main.run()
+
+    expect(runMock).toHaveBeenCalled()
+    expect(setFailedMock).not.toHaveBeenCalled()
+    expect(infoMock).toHaveBeenCalledWith(
+      "Version does not exist and 'check-only' is true"
+    )
     expect(runMock).toHaveReturned()
   })
 })

@@ -8053,6 +8053,7 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const version_1 = __nccwpck_require__(1946);
 async function run() {
+    const checkOnly = core.getInput('check-only') === 'true';
     const manifestPath = core.getInput('manifest-path');
     const overwrite = core.getInput('overwrite') === 'true';
     const ref = core.getInput('ref');
@@ -8077,6 +8078,14 @@ async function run() {
         : version_1.Version.infer(manifestPath, workspace);
     if (version === undefined) {
         core.setFailed('Could not infer version');
+        return;
+    }
+    // Stop now if we're only checking the version.
+    if (checkOnly) {
+        if (await version.exists(workspace))
+            core.setFailed("Version already exists and 'check-only' is true");
+        else
+            core.info("Version does not exist and 'check-only' is true");
         return;
     }
     // Check if the tags already exist in the repository.

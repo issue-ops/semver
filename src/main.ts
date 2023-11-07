@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import { Version } from './version'
 
 export async function run() {
+  const checkOnly: boolean = core.getInput('check-only') === 'true'
   const manifestPath: string = core.getInput('manifest-path')
   const overwrite: boolean = core.getInput('overwrite') === 'true'
   const ref: string = core.getInput('ref')
@@ -29,6 +30,15 @@ export async function run() {
 
   if (version === undefined) {
     core.setFailed('Could not infer version')
+    return
+  }
+
+  // Stop now if we're only checking the version.
+  if (checkOnly) {
+    if (await version.exists(workspace))
+      core.setFailed("Version already exists and 'check-only' is true")
+    else core.info("Version does not exist and 'check-only' is true")
+
     return
   }
 
