@@ -10416,7 +10416,6 @@ class Version {
             const body = fs_1.default.readFileSync(`${workspace}/${manifestPath}`, 'utf8');
             const version = parser[manifestFile]?.(body)?.toString();
             core.info(`Inferred version: ${version}`);
-            core.debug(typeof version);
             // Return undefined if no version was found, otherwise return a new
             // instance of the Version class
             return version === undefined ? undefined : new Version(version);
