@@ -1,7 +1,10 @@
 import * as core from '@actions/core'
+import { exec } from '@actions/exec'
+
 import fs from 'fs'
 import * as toml from 'toml'
-import { exec } from '@actions/exec'
+import { XMLParser } from 'fast-xml-parser'
+
 import { TagOptions } from './options'
 
 /**
@@ -124,7 +127,7 @@ export class Version {
           ?.groups?.version
       },
       'pom.xml': (body: string): string | undefined => {
-        return body.match(/<version>(?<version>[^<]+)/)?.groups?.version
+        return new XMLParser().parse(body).project?.version
       }
     }
 
@@ -132,7 +135,7 @@ export class Version {
       core.info(`Reading manifest: ${workspace}/${manifestPath}`)
 
       const body = fs.readFileSync(`${workspace}/${manifestPath}`, 'utf8')
-      const version = parser[manifestFile]?.(body)
+      const version = parser[manifestFile]?.(body)?.toString()
 
       core.info(`Inferred version: ${version}`)
 
@@ -246,7 +249,7 @@ export class Version {
     // There's no need to check for anything other than the "full" tag (with the
     // prerelease, if present). The major.minor or major tags may exist and can
     // be moved.
-    core.info(`Checking for tag: v${this.toString(true)}`)
+    core.info(`Checking for tag: ${this.toString(true)}`)
 
     const tagOptions: TagOptions = new TagOptions(workspace)
 
