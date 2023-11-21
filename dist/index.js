@@ -10409,6 +10409,10 @@ class Version {
             },
             'pom.xml': (body) => {
                 return new fast_xml_parser_1.XMLParser().parse(body).project?.version;
+            },
+            '.version': (body) => {
+                // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+                return body.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm)?.[0];
             }
         };
         try {
