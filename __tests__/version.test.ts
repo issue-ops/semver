@@ -74,6 +74,9 @@ describe('version', () => {
     expect(
       Version.infer('./fixtures/valid/node/package.json', __dirname)?.toString()
     ).toEqual('9.8.7')
+    expect(
+      Version.infer('./fixtures/valid/other/.version', __dirname)?.toString()
+    ).toEqual('1.2.3-pre.4')
   })
 
   it('does not infer the version from invalid manifests', async () => {
@@ -98,6 +101,9 @@ describe('version', () => {
     ).toEqual(undefined)
     expect(
       Version.infer('./fixtures/invalid/node/package.json', __dirname)
+    ).toEqual(undefined)
+    expect(
+      Version.infer('./fixtures/invalid/other/.version', __dirname)?.toString()
     ).toEqual(undefined)
   })
 

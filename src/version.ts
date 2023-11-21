@@ -128,6 +128,12 @@ export class Version {
       },
       'pom.xml': (body: string): string | undefined => {
         return new XMLParser().parse(body).project?.version
+      },
+      '.version': (body: string): string | undefined => {
+        // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+        return body.match(
+          /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm
+        )?.[0]
       }
     }
 
