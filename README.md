@@ -17,11 +17,13 @@ type of manifest file located. This action currently supports the following:
 | Python   | `setup.cfg`      |
 | Python   | `setup.py`       |
 | Java     | `pom.xml`        |
+| _Other_  | `.version`       |
 
-> **Note**
+> [!TIP]
 >
-> This action currently only supports repositories where the manifest file is
-> located at the **root** of the repository.
+> If your project type/language is not available, you can create a generic
+> `.version` file in your repository and refer to that! The `.version` file
+> should only contain the version information.
 
 Once a version has been located, this action automatically creates or updates
 the following tags to point to the specified `ref`, depending on if this is a
@@ -33,6 +35,11 @@ prerelease version or not.
 | No         | `v<major>.<minor>.<patch>`              |
 |            | `v<major>.<minor>`                      |
 |            | `v<major>`                              |
+
+> [!NOTE]
+>
+> Currently build metadata is not supported. If this is something you'd like to
+> see available, [create an issue](https://github.com/issue-ops/semver/issues)!
 
 ## Setup
 
@@ -146,7 +153,7 @@ the repository tags will be updated to:
 | `1243415` | `v2.0.0`, `v2.0`       | Latest `v2.0` (minor)                |
 | `9517391` | `v1.2.3`, `v1.2`, `v1` | Latest `v1` (major) / `v1.2` (minor) |
 
-> [!NOTE]
+> [!WARNING]
 >
 > In prerelease updates, existing major/minor/patch tags **are not** modified.
 
@@ -162,7 +169,7 @@ repository tags will be updated to:
 | `1243415` | `v2.0.0`, `v2.0`       | Latest `v2.0` (minor)                |
 | `9517391` | `v1.2.3`, `v1.2`, `v1` | Latest `v1` (major) / `v1.2` (minor) |
 
-> [!NOTE]
+> [!WARNING]
 >
 > In major/minor/patch updates, existing major/minor/patch tags **are**
 > modified.
