@@ -1,9 +1,10 @@
 import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 
+import { XMLParser } from 'fast-xml-parser'
 import fs from 'fs'
 import * as toml from 'toml'
-import { XMLParser } from 'fast-xml-parser'
+import yaml from 'yaml'
 
 import { TagOptions } from './options'
 
@@ -11,11 +12,16 @@ import { TagOptions } from './options'
  * A parsed, SemVer-compliant version, along with parsing and tagging utilities
  */
 export class Version {
-  // The prerelease version is optional
+  /** Major Version */
   major: string | number
+  /** Minor Version */
   minor: string | number
+  /** Patch Version */
   patch: string | number
+  /** Prerelease Version */
   prerelease?: string | number
+  /** Build Metadata */
+  build?: string | number
 
   /**
    * Create a new Version instance from a version string
@@ -30,10 +36,9 @@ export class Version {
 
     // Build metadata is separated by a `+`
     // https://semver.org/#spec-item-10
-    // TODO: Would we eventually want to support this?
-    const buildMetadata = version.split('+')[1] ?? ''
+    this.build = version.split('+')[1]
     version = version.split('+')[0]
-    core.info(`Discarded build metadata: ${buildMetadata}`)
+    core.info(`Parsed build: ${this.build}`)
 
     // Prerelease *should* be separated by a `-`...sometimes it isn't
     // https://semver.org/#spec-item-9
@@ -56,9 +61,8 @@ export class Version {
     core.info(`Parsed minor: ${this.minor}`)
     core.info(`Parsed patch: ${this.patch}`)
 
-    // If the split version string has more than 3 items, assume those are part
-    // of the prerelease (if not already present)
-    // E.g: `1.2.3.alpha.4` -> `1.2.3-alpha.4`
+    // If the split version string has more than 3 items, assume the remaining
+    // are part of the prerelease (e.g: `1.2.3.alpha.4` -> `1.2.3-alpha.4`)
     if (this.prerelease === undefined && version.split('.').length > 3) {
       this.prerelease = splitVersion.slice(3).join('.')
       core.info(`Parsed prerelease: ${this.prerelease}`)
@@ -78,9 +82,13 @@ export class Version {
    * @returns The version as a string
    */
   toString(prefix: boolean = false): string {
-    return `${prefix ? 'v' : ''}${this.major}.${this.minor}.${this.patch}${
-      this.prerelease ? `-${this.prerelease}` : ''
-    }`
+    let version = prefix ? 'v' : ''
+    version += `${this.major}.${this.minor}.${this.patch}`
+
+    if (this.prerelease) version += `-${this.prerelease}`
+    if (this.build) version += `+${this.build}`
+
+    return version
   }
 
   /**
@@ -89,6 +97,7 @@ export class Version {
    * - Node.js: package.json
    * - Python: pyproject.toml, setup.cfg, setup.py
    * - Java: pom.xml
+   * - Dart: pubspec.yaml
    * TODO: C#, C++, Go, Rust, Ruby, Swift, etc.
    *
    * @param manifestPath The path to the manifest file
@@ -127,7 +136,11 @@ export class Version {
           ?.groups?.version
       },
       'pom.xml': (body: string): string | undefined => {
-        return new XMLParser().parse(body).project?.version
+        return new XMLParser().parse(body).project?.version?.toString()
+      },
+      'pubspec.yaml': (body: string): string | undefined => {
+        const yamlBody = yaml.parse(body)
+        return yamlBody.version
       },
       '.version': (body: string): string | undefined => {
         // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
@@ -141,7 +154,7 @@ export class Version {
       core.info(`Reading manifest: ${workspace}/${manifestPath}`)
 
       const body = fs.readFileSync(`${workspace}/${manifestPath}`, 'utf8')
-      const version = parser[manifestFile]?.(body)?.toString()
+      const version = parser[manifestFile]?.(body)
 
       core.info(`Inferred version: ${version}`)
 
@@ -152,9 +165,7 @@ export class Version {
       if (error.code === 'ENOENT') {
         core.error('Manifest not found')
         return undefined
-      } else {
-        throw error
-      }
+      } else throw error
     }
   }
 
@@ -166,17 +177,29 @@ export class Version {
    */
   async tag(ref: string, workspace: string): Promise<void> {
     const tagOptions: TagOptions = new TagOptions(workspace)
+    const tags: string[] = []
 
-    // If this is a prerelease, only update the prerelease tag. Otherwise,
-    // update the major, minor, and patch tags.
-    // TODO: Do we want to update the prerelease tag all the time?
-    const tags = this.prerelease
-      ? [`v${this.major}.${this.minor}.${this.patch}-${this.prerelease}`]
-      : [
-          `v${this.major}`,
-          `v${this.major}.${this.minor}`,
-          `v${this.major}.${this.minor}.${this.patch}`
-        ]
+    if (this.prerelease) {
+      // Builds that contain a prerelease version should only update:
+      // - `major.minor.patch-prerelease` (e.g. `v1.2.3-alpha.4`)
+      // - `major.minor.patch-prerelease+build` (e.g. `v1.2.3-alpha.4+build.5`)
+      tags.push(`v${this.major}.${this.minor}.${this.patch}-${this.prerelease}`)
+      if (this.build)
+        tags.push(
+          `v${this.major}.${this.minor}.${this.patch}-${this.prerelease}+${this.build}`
+        )
+    } else {
+      // Builds that do not contain a prerelease version should update:
+      // - `major` (e.g. `v1`)
+      // - `major.minor` (e.g. `v1.2`)
+      // - `major.minor.patch` (e.g. `v1.2.3`)
+      // - `major.minor.patch+build` (e.g. `v1.2.3+build.4`)
+      tags.push(`v${this.major}`)
+      tags.push(`v${this.major}.${this.minor}`)
+      tags.push(`v${this.major}.${this.minor}.${this.patch}`)
+      if (this.build)
+        tags.push(`v${this.major}.${this.minor}.${this.patch}+${this.build}`)
+    }
 
     core.info(`Tags to update: ${JSON.stringify(tags)}`)
 
@@ -247,14 +270,17 @@ export class Version {
   /**
    * Checks if the version tags already exist in the repository
    *
+   * If there is a build number, that should be included in the check. If there
+   * is a prerelease, that should also be included. Otherwise, only the
+   * `major.minor.patch` tag needs to be checked. The `major.minor` and `major`
+   * tags "float" (they move with the more specific patch version). The
+   * `toString` method of this class already accounts for this behavior.
+   *
    * @param manifestPath The path to the manifest file
    * @param workspace The project workspace
    * @returns True if the version tags exist, otherwise false
    */
   async exists(workspace: string): Promise<boolean> {
-    // There's no need to check for anything other than the "full" tag (with the
-    // prerelease, if present). The major.minor or major tags may exist and can
-    // be moved.
     core.info(`Checking for tag: ${this.toString(true)}`)
 
     const tagOptions: TagOptions = new TagOptions(workspace)

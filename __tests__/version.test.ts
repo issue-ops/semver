@@ -76,7 +76,10 @@ describe('version', () => {
     ).toEqual('9.8.7')
     expect(
       Version.infer('./fixtures/valid/other/.version', __dirname)?.toString()
-    ).toEqual('1.2.3-pre.4')
+    ).toEqual('1.2.3-pre.4+build.12345')
+    expect(
+      Version.infer('./fixtures/valid/dart/pubspec.yaml', __dirname)?.toString()
+    ).toEqual('1.2.3-alpha.4+build.5')
   })
 
   it('does not infer the version from invalid manifests', async () => {
@@ -104,6 +107,12 @@ describe('version', () => {
     ).toEqual(undefined)
     expect(
       Version.infer('./fixtures/invalid/other/.version', __dirname)?.toString()
+    ).toEqual(undefined)
+    expect(
+      Version.infer(
+        './fixtures/invalid/dart/pubspec.yaml',
+        __dirname
+      )?.toString()
     ).toEqual(undefined)
   })
 
@@ -180,12 +189,30 @@ describe('version', () => {
         args?: string[],
         options?: any
       ): Promise<number> => {
+        if (commandLine === 'git tag -d "v1.2.3-alpha.4+build.5"') {
+          // Deleting the existing tag writes to stdout
+          options.listeners.stdout(
+            Buffer.from("Deleted tag 'v1.2.3-alpha.4+build.5'")
+          )
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git tag -d "v1.2.3-alpha.4"') {
           // Deleting the existing tag writes to stdout
           options.listeners.stdout(Buffer.from("Deleted tag 'v1.2.3-alpha.4'"))
           return Promise.resolve(0)
         }
 
+        if (
+          commandLine === 'git push origin --delete "v1.2.3-alpha.4+build.5"'
+        ) {
+          // Successfully deleting the remote tag writes to stderr
+          options.listeners.stderr(
+            Buffer.from(
+              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3-alpha.4+build.5'
+            )
+          )
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git push origin --delete "v1.2.3-alpha.4"') {
           // Successfully deleting the remote tag writes to stderr
           options.listeners.stderr(
@@ -196,6 +223,10 @@ describe('version', () => {
           return Promise.resolve(0)
         }
 
+        if (commandLine === 'git tag "v1.2.3-alpha.4+build.5" "main"') {
+          // Creating a new tag doesn't write anything
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git tag "v1.2.3-alpha.4" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
@@ -215,9 +246,14 @@ describe('version', () => {
       }
     )
 
-    const version = new Version('1.2.3-alpha.4')
+    const version = new Version('1.2.3-alpha.4+build.5')
     await version.tag('main', `${__dirname}/fixtures/valid`)
 
+    expect(execMock).toHaveBeenCalledWith(
+      'git tag -d "v1.2.3-alpha.4+build.5"',
+      [],
+      expect.any(Object)
+    )
     expect(execMock).toHaveBeenCalledWith(
       'git tag -d "v1.2.3-alpha.4"',
       [],
@@ -239,6 +275,11 @@ describe('version', () => {
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
+      'git push origin --delete "v1.2.3-alpha.4+build.5"',
+      [],
+      expect.any(Object)
+    )
+    expect(execMock).toHaveBeenCalledWith(
       'git push origin --delete "v1.2.3-alpha.4"',
       [],
       expect.any(Object)
@@ -255,6 +296,11 @@ describe('version', () => {
     )
     expect(execMock).not.toHaveBeenCalledWith(
       'git push origin --delete "v1"',
+      [],
+      expect.any(Object)
+    )
+    expect(execMock).toHaveBeenCalledWith(
+      'git tag "v1.2.3-alpha.4+build.5" "main"',
       [],
       expect.any(Object)
     )
@@ -416,6 +462,11 @@ describe('version', () => {
         args?: string[],
         options?: any
       ): Promise<number> => {
+        if (commandLine === 'git tag -d "v1.2.3+build.5"') {
+          // Deleting the existing tag writes to stdout
+          options.listeners.stdout(Buffer.from("Deleted tag 'v1.2.3+build.5'"))
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git tag -d "v1.2.3"') {
           // Deleting the existing tag writes to stdout
           options.listeners.stdout(Buffer.from("Deleted tag 'v1.2.3'"))
@@ -432,11 +483,20 @@ describe('version', () => {
           return Promise.resolve(0)
         }
 
+        if (commandLine === 'git push origin --delete "v1.2.3+build.5"') {
+          // Successfully deleting the remote tag writes to stderr
+          options.listeners.stderr(
+            Buffer.from(
+              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3+build.5'
+            )
+          )
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git push origin --delete "v1.2.3"') {
           // Successfully deleting the remote tag writes to stderr
           options.listeners.stderr(
             Buffer.from(
-              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3-alpha.4'
+              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3'
             )
           )
           return Promise.resolve(0)
@@ -445,7 +505,7 @@ describe('version', () => {
           // Successfully deleting the remote tag writes to stderr
           options.listeners.stderr(
             Buffer.from(
-              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3-alpha.4'
+              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2'
             )
           )
           return Promise.resolve(0)
@@ -454,12 +514,16 @@ describe('version', () => {
           // Successfully deleting the remote tag writes to stderr
           options.listeners.stderr(
             Buffer.from(
-              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1.2.3-alpha.4'
+              'To github.com:issue-ops/testing-repo.git\n - [deleted]         v1'
             )
           )
           return Promise.resolve(0)
         }
 
+        if (commandLine === 'git tag "v1.2.3+build.5" "main"') {
+          // Creating a new tag doesn't write anything
+          return Promise.resolve(0)
+        }
         if (commandLine === 'git tag "v1.2.3" "main"') {
           // Creating a new tag doesn't write anything
           return Promise.resolve(0)
@@ -487,9 +551,14 @@ describe('version', () => {
       }
     )
 
-    const version = new Version('1.2.3')
+    const version = new Version('1.2.3+build.5')
     await version.tag('main', `${__dirname}/fixtures/valid`)
 
+    expect(execMock).toHaveBeenCalledWith(
+      'git tag -d "v1.2.3+build.5"',
+      [],
+      expect.any(Object)
+    )
     expect(execMock).toHaveBeenCalledWith(
       'git tag -d "v1.2.3"',
       [],
@@ -506,6 +575,11 @@ describe('version', () => {
       expect.any(Object)
     )
     expect(execMock).toHaveBeenCalledWith(
+      'git push origin --delete "v1.2.3+build.5"',
+      [],
+      expect.any(Object)
+    )
+    expect(execMock).toHaveBeenCalledWith(
       'git push origin --delete "v1.2.3"',
       [],
       expect.any(Object)
@@ -517,6 +591,11 @@ describe('version', () => {
     )
     expect(execMock).toHaveBeenCalledWith(
       'git push origin --delete "v1"',
+      [],
+      expect.any(Object)
+    )
+    expect(execMock).toHaveBeenCalledWith(
+      'git tag "v1.2.3+build.5" "main"',
       [],
       expect.any(Object)
     )

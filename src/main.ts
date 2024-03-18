@@ -12,41 +12,33 @@ export async function run() {
   if (
     (manifestPath === '' && useVersion === '') ||
     (manifestPath !== '' && useVersion !== '')
-  ) {
-    core.setFailed('Must provide manifest-path OR use-version')
-    return
-  }
+  )
+    return core.setFailed('Must provide manifest-path OR use-version')
 
   core.info('Running action with inputs:')
+  core.info(`\tCheck: ${checkOnly}`)
+  core.info(`\tManifest Path: ${manifestPath}`)
+  core.info(`\tOverwrite: ${overwrite}`)
   core.info(`\tRef: ${ref}`)
-  if (manifestPath !== '') core.info(`\tManifest Path: ${manifestPath}`)
-  if (useVersion !== '') core.info(`\tUse Version: ${useVersion}`)
-  if (workspace !== '') core.info(`\tWorkspace: ${workspace}`)
+  core.info(`\tUse Version: ${useVersion}`)
+  core.info(`\tWorkspace: ${workspace}`)
 
   // Get version from input string, or infer it from the workspace
   const version: Version | undefined = useVersion
     ? new Version(useVersion)
     : Version.infer(manifestPath, workspace)
 
-  if (version === undefined) {
-    core.setFailed('Could not infer version')
-    return
-  }
+  if (version === undefined) return core.setFailed('Could not infer version')
 
   // Stop now if we're only checking the version.
-  if (checkOnly) {
+  if (checkOnly)
     if (await version.exists(workspace))
-      core.setFailed("Version already exists and 'check-only' is true")
-    else core.info("Version does not exist and 'check-only' is true")
-
-    return
-  }
+      return core.setFailed("Version already exists and 'check-only' is true")
+    else return core.info("Version does not exist and 'check-only' is true")
 
   // Check if the tags already exist in the repository.
-  if (!overwrite && (await version.exists(workspace))) {
-    core.setFailed("Version already exists and 'overwrite' is false")
-    return
-  }
+  if (!overwrite && (await version.exists(workspace)))
+    return core.setFailed("Version already exists and 'overwrite' is false")
 
   core.info(`Inferred Version: ${version.toString()}`)
   core.info(`Tagging ${ref} with version ${version.toString()}`)
@@ -56,7 +48,7 @@ export async function run() {
   core.info('Tagging complete')
 
   // Output the various version formats
-  // [X.Y.Z-PRE, X.Y.Z, X.Y, X, Y, Z, PRE]
+  // [X.Y.Z-PRE+BUILD, X.Y.Z, X.Y, X, Y, Z, PRE, BUILD]
   core.setOutput('version', version.toString(false))
   core.setOutput(
     'major-minor-patch',
@@ -66,5 +58,6 @@ export async function run() {
   core.setOutput('major', version.major)
   core.setOutput('minor', version.minor)
   core.setOutput('patch', version.patch)
-  core.setOutput('prerelease', version.prerelease)
+  if (version.prerelease) core.setOutput('prerelease', version.prerelease)
+  if (version.build) core.setOutput('build', version.build)
 }
