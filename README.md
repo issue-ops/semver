@@ -12,10 +12,11 @@ type of manifest file located. This action currently supports the following:
 
 | Language | Manifest File    |
 | -------- | ---------------- |
+| Dart     | `pubspec.yaml`   |
 | Node.js  | `package.json`   |
 | Python   | `pyproject.toml` |
-| Python   | `setup.cfg`      |
-| Python   | `setup.py`       |
+|          | `setup.cfg`      |
+|          | `setup.py`       |
 | Java     | `pom.xml`        |
 | _Other_  | `.version`       |
 
@@ -29,17 +30,19 @@ Once a version has been located, this action automatically creates or updates
 the following tags to point to the specified `ref`, depending on if this is a
 prerelease version or not.
 
-| Prerelease | Tag                                     |
-| ---------- | --------------------------------------- |
-| Yes        | `v<major>.<minor>.<patch>-<prerelease>` |
-| No         | `v<major>.<minor>.<patch>`              |
-|            | `v<major>.<minor>`                      |
-|            | `v<major>`                              |
+| Prerelease | Tag                                             |
+| ---------- | ----------------------------------------------- |
+| Yes        | `v<major>.<minor>.<patch>-<prerelease>+<build>` |
+|            | `v<major>.<minor>.<patch>-<prerelease>`         |
+| No         | `v<major>.<minor>.<patch>+<build>`              |
+|            | `v<major>.<minor>.<patch>`                      |
+|            | `v<major>.<minor>`                              |
+|            | `v<major>`                                      |
 
 > [!NOTE]
 >
-> Currently build metadata is not supported. If this is something you'd like to
-> see available, [create an issue](https://github.com/issue-ops/semver/issues)!
+> Build tags are only created if build metadata is provided/inferred from the
+> version string.
 
 ## Setup
 
@@ -111,24 +114,29 @@ jobs:
 ## Outputs
 
 The action outputs the following (assuming the version in the manifest file is
-`1.2.3-alpha.4`):
+`1.2.3-alpha.4+build.5`):
 
-| Output              | Description                          | Example         |
-| ------------------- | ------------------------------------ | --------------- |
-| `version`           | The full semantic version            | `1.2.3-alpha.4` |
-| `major-minor-patch` | The major, minor, and patch versions | `1.2.3`         |
-| `major-minor`       | The major and minor versions         | `1.2`           |
-| `major`             | The major version                    | `1`             |
-| `minor`             | The minor version                    | `2`             |
-| `patch`             | The patch version                    | `3`             |
-| `prerelease`        | The prerelease version               | `alpha.4`       |
+| Output              | Description               | Example                 |
+| ------------------- | ------------------------- | ----------------------- |
+| `version`           | Full Semantic Version     | `1.2.3-alpha.4+build.5` |
+| `major-minor-patch` | `<major>.<minor>.<patch>` | `1.2.3`                 |
+| `major-minor`       | `<major>.<minor>`         | `1.2`                   |
+| `major`             | `<major>`                 | `1`                     |
+| `minor`             | `<minor>`                 | `2`                     |
+| `patch`             | `<patch>`                 | `3`                     |
+| `prerelease`        | `<prerelease>`            | `alpha.4`               |
+| `build`             | `<build>`                 | `build.5`               |
+
+If the prerelease and/or build versions are not provided, they will not be
+included in the full `version` output.
 
 ## Errors
 
 If the `overwrite` parameter is `'false'` (the default value), this action will
 fail if there is an existing version tag in the repository that matches the
 inferred or provided version. This is to prevent releases from overwriting one
-another.
+another. However, this only applies to the full `version` output. Other tags,
+such as `<major>.<minor>` are ignored in this check.
 
 ## Example
 

@@ -89,7 +89,8 @@ describe('main', () => {
       minor: '2',
       patch: '3',
       prerelease: 'alpha.4',
-      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      build: 'build.5',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4+build.5'),
       tag: jest.fn(),
       exists: jest.fn().mockImplementation(() => false)
     } as Version
@@ -156,7 +157,8 @@ describe('main', () => {
       minor: '2',
       patch: '3',
       prerelease: 'alpha.4',
-      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      build: 'build.5',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4+build.5'),
       tag: jest.fn(),
       exists: jest.fn().mockImplementation(() => false)
     } as Version
@@ -172,7 +174,11 @@ describe('main', () => {
     expect(setOutputMock).toHaveBeenCalledWith('minor', '2')
     expect(setOutputMock).toHaveBeenCalledWith('patch', '3')
     expect(setOutputMock).toHaveBeenCalledWith('prerelease', 'alpha.4')
-    expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3-alpha.4')
+    expect(setOutputMock).toHaveBeenCalledWith('build', 'build.5')
+    expect(setOutputMock).toHaveBeenCalledWith(
+      'version',
+      '1.2.3-alpha.4+build.5'
+    )
     expect(runMock).toHaveReturned()
   })
 
@@ -188,7 +194,7 @@ describe('main', () => {
         case 'ref':
           return 'refs/heads/main'
         case 'use-version':
-          return '1.2.3-alpha.4'
+          return '1.2.3-alpha.4+build.5'
         case 'overwrite':
           return 'true'
         default:
@@ -199,13 +205,56 @@ describe('main', () => {
     await main.run()
 
     expect(runMock).toHaveBeenCalled()
-    expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3-alpha.4')
+    expect(setOutputMock).toHaveBeenCalledWith(
+      'version',
+      '1.2.3-alpha.4+build.5'
+    )
     expect(setOutputMock).toHaveBeenCalledWith('major-minor-patch', '1.2.3')
     expect(setOutputMock).toHaveBeenCalledWith('major-minor', '1.2')
     expect(setOutputMock).toHaveBeenCalledWith('major', '1')
     expect(setOutputMock).toHaveBeenCalledWith('minor', '2')
     expect(setOutputMock).toHaveBeenCalledWith('patch', '3')
     expect(setOutputMock).toHaveBeenCalledWith('prerelease', 'alpha.4')
+    expect(setOutputMock).toHaveBeenCalledWith('build', 'build.5')
+    expect(runMock).toHaveReturned()
+  })
+
+  it('does not set prerelease or build outputs if they are not present', async () => {
+    // Ignore the version.tag() call
+    jest.spyOn(Version.prototype, 'tag').mockImplementation()
+
+    // Return valid values for all inputs
+    jest.spyOn(core, 'getInput').mockImplementation((name: string): string => {
+      switch (name) {
+        case 'check-only':
+          return 'false'
+        case 'ref':
+          return 'refs/heads/main'
+        case 'use-version':
+          return '1.2.3'
+        case 'overwrite':
+          return 'true'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+
+    expect(runMock).toHaveBeenCalled()
+    expect(setOutputMock).not.toHaveBeenCalledWith(
+      'version',
+      '1.2.3-alpha.4+build.5'
+    )
+    expect(setOutputMock).not.toHaveBeenCalledWith('version', '1.2.3-alpha.4')
+    expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3')
+    expect(setOutputMock).toHaveBeenCalledWith('major-minor-patch', '1.2.3')
+    expect(setOutputMock).toHaveBeenCalledWith('major-minor', '1.2')
+    expect(setOutputMock).toHaveBeenCalledWith('major', '1')
+    expect(setOutputMock).toHaveBeenCalledWith('minor', '2')
+    expect(setOutputMock).toHaveBeenCalledWith('patch', '3')
+    expect(setOutputMock).not.toHaveBeenCalledWith('prerelease', 'alpha.4')
+    expect(setOutputMock).not.toHaveBeenCalledWith('build', 'build.5')
     expect(runMock).toHaveReturned()
   })
 
@@ -234,7 +283,8 @@ describe('main', () => {
       minor: '2',
       patch: '3',
       prerelease: 'alpha.4',
-      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      build: 'build.5',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4+build.5'),
       tag: jest.fn(),
       exists: jest.fn().mockImplementation(() => true)
     } as Version
@@ -275,7 +325,8 @@ describe('main', () => {
       minor: '2',
       patch: '3',
       prerelease: 'alpha.4',
-      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      build: 'build.5',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4+build.5'),
       tag: jest.fn(),
       exists: jest.fn().mockImplementation(() => true)
     } as Version
@@ -316,7 +367,8 @@ describe('main', () => {
       minor: '2',
       patch: '3',
       prerelease: 'alpha.4',
-      toString: jest.fn().mockReturnValue('1.2.3-alpha.4'),
+      build: 'build.5',
+      toString: jest.fn().mockReturnValue('1.2.3-alpha.4+build.5'),
       tag: jest.fn(),
       exists: jest.fn().mockImplementation(() => false)
     } as Version
