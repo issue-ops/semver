@@ -265,6 +265,8 @@ export class Version {
     // Ignore stderr if the tag was pushed
     if (tagOptions.stderr.includes('[new tag]') === false)
       throw new Error(tagOptions.stderr)
+
+    core.info('Tagging complete')
   }
 
   /**
