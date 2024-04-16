@@ -10187,19 +10187,19 @@ async function run() {
     if (version === undefined)
         return core.setFailed('Could not infer version');
     // Stop now if we're only checking the version.
-    if (checkOnly)
-        if (await version.exists(workspace))
-            return core.setFailed("Version already exists and 'check-only' is true");
-        else
-            return core.info("Version does not exist and 'check-only' is true");
+    if (checkOnly && (await version.exists(workspace)))
+        return core.setFailed("Version already exists and 'check-only' is true");
     // Check if the tags already exist in the repository.
-    if (!overwrite && (await version.exists(workspace)))
+    if (!checkOnly && !overwrite && (await version.exists(workspace)))
         return core.setFailed("Version already exists and 'overwrite' is false");
     core.info(`Inferred Version: ${version.toString()}`);
     core.info(`Tagging ${ref} with version ${version.toString()}`);
-    // Tag and push the version in the workspace
-    await version.tag(ref, workspace);
-    core.info('Tagging complete');
+    // If not running in checkOnly mode, tag and push the version in the
+    // workspace. Otherwise, just output the version information.
+    if (!checkOnly)
+        await version.tag(ref, workspace);
+    else
+        core.info("Version does not exist and 'check-only' is true");
     // Output the various version formats
     // [X.Y.Z-PRE+BUILD, X.Y.Z, X.Y, X, Y, Z, PRE, BUILD]
     core.setOutput('version', version.toString(false));
@@ -10517,6 +10517,7 @@ class Version {
         // Ignore stderr if the tag was pushed
         if (tagOptions.stderr.includes('[new tag]') === false)
             throw new Error(tagOptions.stderr);
+        core.info('Tagging complete');
     }
     /**
      * Checks if the version tags already exist in the repository
