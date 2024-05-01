@@ -90,7 +90,7 @@
     "@actions/exec": "^1.1.1",
     "fast-xml-parser": "^4.3.6",
     "toml": "^3.0.0",
-    "yaml": "^2.4.1"
+    "yaml": "^2.4.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.1",
