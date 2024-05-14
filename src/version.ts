@@ -278,11 +278,11 @@ export class Version {
    * tags "float" (they move with the more specific patch version). The
    * `toString` method of this class already accounts for this behavior.
    *
-   * @param manifestPath The path to the manifest file
    * @param workspace The project workspace
+   * @param allowPrerelease True to allow prerelease version conflicts
    * @returns True if the version tags exist, otherwise false
    */
-  async exists(workspace: string): Promise<boolean> {
+  async exists(workspace: string, allowPrerelease: boolean): Promise<boolean> {
     core.info(`Checking for tag: ${this.toString(true)}`)
 
     const tagOptions: TagOptions = new TagOptions(workspace)
@@ -291,6 +291,11 @@ export class Version {
 
     core.debug(`STDOUT: ${tagOptions.stdout}`)
     core.debug(`STDERR: ${tagOptions.stderr}`)
+
+    if (this.prerelease && allowPrerelease) {
+      core.info('Prerelease version conflict allowed')
+      return false
+    }
 
     if (tagOptions.stdout.includes(this.toString(true))) return true
     else return false

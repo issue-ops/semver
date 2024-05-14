@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import { Version } from './version'
 
 export async function run() {
+  const allowPrerelease: boolean = core.getInput('allow-prerelease') === 'true'
   const checkOnly: boolean = core.getInput('check-only') === 'true'
   const manifestPath: string = core.getInput('manifest-path')
   const overwrite: boolean = core.getInput('overwrite') === 'true'
@@ -16,6 +17,7 @@ export async function run() {
     return core.setFailed('Must provide manifest-path OR use-version')
 
   core.info('Running action with inputs:')
+  core.info(`\tAllow Prerelease: ${allowPrerelease}`)
   core.info(`\tCheck: ${checkOnly}`)
   core.info(`\tManifest Path: ${manifestPath}`)
   core.info(`\tOverwrite: ${overwrite}`)
@@ -31,11 +33,11 @@ export async function run() {
   if (version === undefined) return core.setFailed('Could not infer version')
 
   // Stop now if we're only checking the version.
-  if (checkOnly && (await version.exists(workspace)))
+  if (checkOnly && (await version.exists(workspace, allowPrerelease)))
     return core.setFailed("Version already exists and 'check-only' is true")
 
   // Check if the tags already exist in the repository.
-  if (!checkOnly && !overwrite && (await version.exists(workspace)))
+  if (!checkOnly && !overwrite && (await version.exists(workspace, false)))
     return core.setFailed("Version already exists and 'overwrite' is false")
 
   core.info(`Inferred Version: ${version.toString()}`)

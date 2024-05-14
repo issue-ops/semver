@@ -6,6 +6,12 @@ branding:
   color: blue
 
 inputs:
+  allow-prerelease:
+    default: 'true'
+    description:
+      When `check-only` is set to 'true', this will allow prerelease versions to
+      pass. Defaults to 'true'.
+    required: false
   check-only:
     default: 'false'
     description:

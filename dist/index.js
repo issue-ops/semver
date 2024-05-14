@@ -10164,6 +10164,7 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const version_1 = __nccwpck_require__(1946);
 async function run() {
+    const allowPrerelease = core.getInput('allow-prerelease') === 'true';
     const checkOnly = core.getInput('check-only') === 'true';
     const manifestPath = core.getInput('manifest-path');
     const overwrite = core.getInput('overwrite') === 'true';
@@ -10174,6 +10175,7 @@ async function run() {
         (manifestPath !== '' && useVersion !== ''))
         return core.setFailed('Must provide manifest-path OR use-version');
     core.info('Running action with inputs:');
+    core.info(`\tAllow Prerelease: ${allowPrerelease}`);
     core.info(`\tCheck: ${checkOnly}`);
     core.info(`\tManifest Path: ${manifestPath}`);
     core.info(`\tOverwrite: ${overwrite}`);
@@ -10187,10 +10189,10 @@ async function run() {
     if (version === undefined)
         return core.setFailed('Could not infer version');
     // Stop now if we're only checking the version.
-    if (checkOnly && (await version.exists(workspace)))
+    if (checkOnly && (await version.exists(workspace, allowPrerelease)))
         return core.setFailed("Version already exists and 'check-only' is true");
     // Check if the tags already exist in the repository.
-    if (!checkOnly && !overwrite && (await version.exists(workspace)))
+    if (!checkOnly && !overwrite && (await version.exists(workspace, false)))
         return core.setFailed("Version already exists and 'overwrite' is false");
     core.info(`Inferred Version: ${version.toString()}`);
     core.info(`Tagging ${ref} with version ${version.toString()}`);
@@ -10528,16 +10530,20 @@ class Version {
      * tags "float" (they move with the more specific patch version). The
      * `toString` method of this class already accounts for this behavior.
      *
-     * @param manifestPath The path to the manifest file
      * @param workspace The project workspace
+     * @param allowPrerelease True to allow prerelease version conflicts
      * @returns True if the version tags exist, otherwise false
      */
-    async exists(workspace) {
+    async exists(workspace, allowPrerelease) {
         core.info(`Checking for tag: ${this.toString(true)}`);
         const tagOptions = new options_1.TagOptions(workspace);
         await (0, exec_1.exec)(`git tag -l "${this.toString(true)}"`, [], tagOptions.options);
         core.debug(`STDOUT: ${tagOptions.stdout}`);
         core.debug(`STDERR: ${tagOptions.stderr}`);
+        if (this.prerelease && allowPrerelease) {
+            core.info('Prerelease version conflict allowed');
+            return false;
+        }
         if (tagOptions.stdout.includes(this.toString(true)))
             return true;
         else

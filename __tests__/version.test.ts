@@ -637,7 +637,9 @@ describe('version', () => {
 
     const version = new Version('1.2.3-alpha.4')
 
-    expect(await version.exists(`${__dirname}/fixtures/valid`)).toBe(true)
+    expect(await version.exists(`${__dirname}/fixtures/valid`, false)).toBe(
+      true
+    )
   })
 
   it('exists returns false if the tag does not exist', async () => {
@@ -656,6 +658,29 @@ describe('version', () => {
 
     const version = new Version('1.2.3-alpha.4')
 
-    expect(await version.exists(`${__dirname}/fixtures/valid`)).toBe(false)
+    expect(await version.exists(`${__dirname}/fixtures/valid`, false)).toBe(
+      false
+    )
+  })
+
+  it('exists returns false if the tag exists but prereleases are allowed', async () => {
+    // Mock the exec package to return the tag
+    const execMock = exec as jest.MockedFunction<typeof exec>
+    execMock.mockImplementation(
+      (
+        commandLine: string,
+        args?: string[],
+        options?: any
+      ): Promise<number> => {
+        options.listeners.stdout(Buffer.from('1.2.3-alpha.4'))
+        return Promise.resolve(0)
+      }
+    )
+
+    const version = new Version('1.2.3-alpha.4')
+
+    expect(await version.exists(`${__dirname}/fixtures/valid`, true)).toBe(
+      false
+    )
   })
 })

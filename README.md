@@ -93,23 +93,27 @@ jobs:
 
 ## Inputs
 
-| Input           | Description                                                |
-| --------------- | ---------------------------------------------------------- |
-| `check-only`    | If set to `'true'`, only checks if the version exists.     |
-|                 | Causes the action to fail if the version already exists.   |
-|                 | Default: `'false'`                                         |
-| `manifest-path` | The path to the manifest file that contains the version.   |
-|                 | Relative to the root of the repository.                    |
-|                 | If not set, `use-version` must be set.                     |
-| `overwrite`     | Set to `'true'` for the action to overwrite existing tags. |
-|                 | Default: `'false'`                                         |
-| `ref`           | The Git ref to tag with the specified or inferred version. |
-|                 | Defaults to the base ref of a pull request event trigger.  |
-| `use-version`   | The version you want to explicitly use.                    |
-|                 | This must follow SemVer 2.0 standards.                     |
-|                 | If not set, `manifest-path` must be set.                   |
-| `workspace`     | The path where the repository has been cloned.             |
-|                 | Default: `${{ github.workspace }}` for `actions/checkout`. |
+| Input              | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `allow-prerelease` | If `check-only` is `'true'`, this controls if the      |
+|                    | check should pass if a matching prerelease version is  |
+|                    | detected (e.g. `v1.0.0-SNAPSHOT`)                      |
+|                    | Default: `'true'`                                      |
+| `check-only`       | If set to `'true'`, only checks if the version exists. |
+|                    | Fails the action if the version already exists.        |
+|                    | Default: `'false'`                                     |
+| `manifest-path`    | The path to the manifest that contains the version.    |
+|                    | Relative to the root of the repository.                |
+|                    | If not set, `use-version` must be set.                 |
+| `overwrite`        | Set to `'true'` to overwrite existing tags.            |
+|                    | Default: `'false'`                                     |
+| `ref`              | The Git ref to tag.                                    |
+|                    | Defaults to the base ref of a pull request trigger.    |
+| `use-version`      | The version you want to explicitly use.                |
+|                    | This must follow SemVer 2.0 standards.                 |
+|                    | If not set, `manifest-path` must be set.               |
+| `workspace`        | The path where the repository has been cloned.         |
+|                    | Default: `${{ github.workspace }}`                     |
 
 ## Outputs
 
