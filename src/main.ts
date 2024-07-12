@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { Version } from './version'
+import { Version } from './version.js'
 
 export async function run() {
   const allowPrerelease: boolean = core.getInput('allow-prerelease') === 'true'
@@ -26,6 +26,7 @@ export async function run() {
   core.info(`\tWorkspace: ${workspace}`)
 
   // Get version from input string, or infer it from the workspace
+  /* istanbul ignore next */
   const version: Version | undefined = useVersion
     ? new Version(useVersion)
     : Version.infer(manifestPath, workspace)
@@ -45,6 +46,7 @@ export async function run() {
 
   // If not running in checkOnly mode, tag and push the version in the
   // workspace. Otherwise, just output the version information.
+  /* istanbul ignore next */
   if (!checkOnly) await version.tag(ref, workspace)
   else core.info("Version does not exist and 'check-only' is true")
 

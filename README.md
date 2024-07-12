@@ -4,8 +4,12 @@
 [![CodeQL](https://github.com/issue-ops/semver/actions/workflows/codeql.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/codeql.yml)
 [![Continuous Integration](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml)
 [![Continuous Delivery](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml)
-[![Super Linter](https://github.com/issue-ops/semver/actions/workflows/super-linter.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/super-linter.yml)
+[![Linter](https://github.com/issue-ops/semver/actions/workflows/linter.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/linter.yml)
 [![Code Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+
+> [!IMPORTANT]
+>
+> As of version `v2.0.0`, this action has been converted to ESM.
 
 Gets the [Semantic Version](https://semver.org/) of a repository based on the
 type of manifest file located. This action currently supports the following:
