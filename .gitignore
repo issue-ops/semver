@@ -1,5 +1,6 @@
 # vscode
 .vscode
+.env
 
 # Dependency directory
 node_modules/
@@ -17,7 +18,7 @@ reports
 # OS metadata
 .DS_Store
 Thumbs.db
-.env
 
 # Extra
 tmp/
+linter/

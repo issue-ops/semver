@@ -1,12 +1,10 @@
 import * as core from '@actions/core'
 import { exec } from '@actions/exec'
-
 import { XMLParser } from 'fast-xml-parser'
 import fs from 'fs'
 import * as toml from 'toml'
 import yaml from 'yaml'
-
-import { TagOptions } from './options'
+import { TagOptions } from './options.js'
 
 /**
  * A parsed, SemVer-compliant version, along with parsing and tagging utilities
@@ -161,6 +159,7 @@ export class Version {
       // Return undefined if no version was found, otherwise return a new
       // instance of the Version class
       return version === undefined ? undefined : new Version(version)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.code === 'ENOENT') {
         core.error('Manifest not found')

@@ -1,5 +1,5 @@
 {
-  "name": "semver",
+  "name": "issue-ops-semver",
   "description": "Semantically version GitHub repository tags",
   "author": "Nick Alteen <ncalteen@github.com>",
   "homepage": "https://github.com/issue-ops/semver#readme",
