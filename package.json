@@ -45,7 +45,7 @@
     "@octokit/rest": "^21.0.0",
     "fast-xml-parser": "^4.4.0",
     "toml": "^3.0.0",
-    "yaml": "^2.4.5"
+    "yaml": "^2.5.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.8",
