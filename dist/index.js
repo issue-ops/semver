@@ -17489,8 +17489,9 @@ class Version {
      *
      * @param ref The ref to tag
      * @param workspace The project workspace
+     * @param push Whether or not to push the tags to the remote
      */
-    async tag(ref, workspace) {
+    async tag(ref, workspace, push) {
         const tagOptions = new TagOptions(workspace);
         const tags = [];
         if (this.prerelease) {
@@ -17548,16 +17549,18 @@ class Version {
             if (tagOptions.stderr !== '')
                 throw new Error(tagOptions.stderr);
         }
-        // Push the tag(s)
-        coreExports.info(`Pushing tag(s): ${JSON.stringify(tags)}`);
-        tagOptions.reset();
-        await exec_2('git push origin --tags', [], tagOptions.options);
-        coreExports.debug(`STDOUT: ${tagOptions.stdout}`);
-        coreExports.debug(`STDERR: ${tagOptions.stderr}`);
-        // Git writes to stderr when tags are pushed successfully
-        // Ignore stderr if the tag was pushed
-        if (tagOptions.stderr.includes('[new tag]') === false)
-            throw new Error(tagOptions.stderr);
+        if (push) {
+            // Push the tag(s)
+            coreExports.info(`Pushing tag(s): ${JSON.stringify(tags)}`);
+            tagOptions.reset();
+            await exec_2('git push origin --tags', [], tagOptions.options);
+            coreExports.debug(`STDOUT: ${tagOptions.stdout}`);
+            coreExports.debug(`STDERR: ${tagOptions.stderr}`);
+            // Git writes to stderr when tags are pushed successfully
+            // Ignore stderr if the tag was pushed
+            if (tagOptions.stderr.includes('[new tag]') === false)
+                throw new Error(tagOptions.stderr);
+        }
         coreExports.info('Tagging complete');
     }
     /**
@@ -17598,6 +17601,7 @@ async function run() {
     const ref = coreExports.getInput('ref');
     const useVersion = coreExports.getInput('use-version');
     const workspace = coreExports.getInput('workspace');
+    const push = coreExports.getInput('push') === 'true';
     if ((manifestPath === '' && useVersion === '') ||
         (manifestPath !== '' && useVersion !== ''))
         return coreExports.setFailed('Must provide manifest-path OR use-version');
@@ -17628,7 +17632,7 @@ async function run() {
     // workspace. Otherwise, just output the version information.
     /* istanbul ignore next */
     if (!checkOnly)
-        await version.tag(ref, workspace);
+        await version.tag(ref, workspace, push);
     else
         coreExports.info("Version does not exist and 'check-only' is true");
     // Output the various version formats

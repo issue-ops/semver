@@ -30,6 +30,12 @@ inputs:
       If tags already exist for the specified or inferred version, setting this
       to 'true' will overwrite them. Defaults to 'false'.
     required: false
+  push-tags:
+    default: 'true'
+    description:
+      If set to 'true', the action will push the tag to the repository. Defaults
+      to 'true'.
+    required: false
   ref:
     default: ${{ github.base_ref }}
     description:

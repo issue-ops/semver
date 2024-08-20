@@ -44,8 +44,9 @@ export declare class Version {
      *
      * @param ref The ref to tag
      * @param workspace The project workspace
+     * @param push Whether or not to push the tags to the remote
      */
-    tag(ref: string, workspace: string): Promise<void>;
+    tag(ref: string, workspace: string, push: boolean): Promise<void>;
     /**
      * Checks if the version tags already exist in the repository
      *
