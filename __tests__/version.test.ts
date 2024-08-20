@@ -278,7 +278,7 @@ describe('version.ts', () => {
     )
 
     const version = new Version('1.2.3-alpha.4+build.5')
-    await version.tag('main', `${__dirname}/fixtures/valid`)
+    await version.tag('main', `${__dirname}/fixtures/valid`, true)
 
     expect(exec.exec).toHaveBeenCalledWith(
       'git tag -d "v1.2.3-alpha.4+build.5"',
@@ -378,7 +378,9 @@ describe('version.ts', () => {
 
     const version = new Version('1.2.3-alpha.4')
     try {
-      expect(await version.tag('main', `${__dirname}/fixtures/valid`)).toThrow()
+      expect(
+        await version.tag('main', `${__dirname}/fixtures/valid`, true)
+      ).toThrow()
     } catch (error) {
       // Do nothing
     }
@@ -410,7 +412,9 @@ describe('version.ts', () => {
 
     const version = new Version('1.2.3-alpha.4')
     try {
-      expect(await version.tag('main', `${__dirname}/fixtures/valid`)).toThrow()
+      expect(
+        await version.tag('main', `${__dirname}/fixtures/valid`, true)
+      ).toThrow()
     } catch (error) {
       // Do nothing
     }
@@ -450,7 +454,9 @@ describe('version.ts', () => {
 
     const version = new Version('1.2.3-alpha.4')
     try {
-      expect(await version.tag('main', `${__dirname}/fixtures/valid`)).toThrow()
+      expect(
+        await version.tag('main', `${__dirname}/fixtures/valid`, true)
+      ).toThrow()
     } catch (error) {
       // Do nothing
     }
@@ -494,7 +500,9 @@ describe('version.ts', () => {
 
     const version = new Version('1.2.3-alpha.4')
     try {
-      expect(await version.tag('main', `${__dirname}/fixtures/valid`)).toThrow()
+      expect(
+        await version.tag('main', `${__dirname}/fixtures/valid`, true)
+      ).toThrow()
     } catch (error) {
       // Do nothing
     }
@@ -612,7 +620,7 @@ describe('version.ts', () => {
     )
 
     const version = new Version('1.2.3+build.5')
-    await version.tag('main', `${__dirname}/fixtures/valid`)
+    await version.tag('main', `${__dirname}/fixtures/valid`, true)
 
     expect(exec.exec).toHaveBeenCalledWith(
       'git tag -d "v1.2.3+build.5"',

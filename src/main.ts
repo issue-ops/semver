@@ -9,6 +9,7 @@ export async function run() {
   const ref: string = core.getInput('ref')
   const useVersion: string = core.getInput('use-version')
   const workspace: string = core.getInput('workspace')
+  const push: boolean = core.getInput('push') === 'true'
 
   if (
     (manifestPath === '' && useVersion === '') ||
@@ -47,7 +48,7 @@ export async function run() {
   // If not running in checkOnly mode, tag and push the version in the
   // workspace. Otherwise, just output the version information.
   /* istanbul ignore next */
-  if (!checkOnly) await version.tag(ref, workspace)
+  if (!checkOnly) await version.tag(ref, workspace, push)
   else core.info("Version does not exist and 'check-only' is true")
 
   // Output the various version formats

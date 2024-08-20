@@ -173,8 +173,9 @@ export class Version {
    *
    * @param ref The ref to tag
    * @param workspace The project workspace
+   * @param push Whether or not to push the tags to the remote
    */
-  async tag(ref: string, workspace: string): Promise<void> {
+  async tag(ref: string, workspace: string, push: boolean): Promise<void> {
     const tagOptions: TagOptions = new TagOptions(workspace)
     const tags: string[] = []
 
@@ -251,19 +252,21 @@ export class Version {
       if (tagOptions.stderr !== '') throw new Error(tagOptions.stderr)
     }
 
-    // Push the tag(s)
-    core.info(`Pushing tag(s): ${JSON.stringify(tags)}`)
-    tagOptions.reset()
+    if (push) {
+      // Push the tag(s)
+      core.info(`Pushing tag(s): ${JSON.stringify(tags)}`)
+      tagOptions.reset()
 
-    await exec('git push origin --tags', [], tagOptions.options)
+      await exec('git push origin --tags', [], tagOptions.options)
 
-    core.debug(`STDOUT: ${tagOptions.stdout}`)
-    core.debug(`STDERR: ${tagOptions.stderr}`)
+      core.debug(`STDOUT: ${tagOptions.stdout}`)
+      core.debug(`STDERR: ${tagOptions.stderr}`)
 
-    // Git writes to stderr when tags are pushed successfully
-    // Ignore stderr if the tag was pushed
-    if (tagOptions.stderr.includes('[new tag]') === false)
-      throw new Error(tagOptions.stderr)
+      // Git writes to stderr when tags are pushed successfully
+      // Ignore stderr if the tag was pushed
+      if (tagOptions.stderr.includes('[new tag]') === false)
+        throw new Error(tagOptions.stderr)
+    }
 
     core.info('Tagging complete')
   }

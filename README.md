@@ -111,6 +111,8 @@ jobs:
 |                    | If not set, `use-version` must be set.                 |
 | `overwrite`        | Set to `'true'` to overwrite existing tags.            |
 |                    | Default: `'false'`                                     |
+| `push-tags`        | Set to `'true'` to push tags to the repository.        |
+|                    | Default: `'true'`                                      |
 | `ref`              | The Git ref to tag.                                    |
 |                    | Defaults to the base ref of a pull request trigger.    |
 | `use-version`      | The version you want to explicitly use.                |
