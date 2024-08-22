@@ -62,6 +62,18 @@ describe('version.ts', () => {
     ).toEqual('8.0.0')
     expect(
       Version.infer(
+        '../__fixtures__/valid/github/action.yaml',
+        __dirname
+      )?.toString()
+    ).toEqual('1.2.3')
+    expect(
+      Version.infer(
+        '../__fixtures__/valid/github/action.yml',
+        __dirname
+      )?.toString()
+    ).toEqual('1.2.3')
+    expect(
+      Version.infer(
         '../__fixtures__/valid/python/pyproject.toml',
         __dirname
       )?.toString()
@@ -104,10 +116,16 @@ describe('version.ts', () => {
     ).toEqual('1.2.3-alpha.4+build.5')
   })
 
-  it('does not infer the version from invalid manifests', async () => {
+  it('Does not infer the version from invalid manifests', async () => {
     // Pass each invalid manifest file
     expect(
       Version.infer('../__fixtures__/invalid/java/pom.xml', __dirname)
+    ).toEqual(undefined)
+    expect(
+      Version.infer('../__fixtures__/invalid/github/action.yaml', __dirname)
+    ).toEqual(undefined)
+    expect(
+      Version.infer('../__fixtures__/invalid/github/action.yml', __dirname)
     ).toEqual(undefined)
     expect(
       Version.infer('../__fixtures__/invalid/python/pyproject.toml', __dirname)
@@ -171,7 +189,7 @@ describe('version.ts', () => {
     ).toBe(undefined)
   })
 
-  it('Rhrows an error if a manifest path is invalid', async () => {
+  it('Throws an error if a manifest path is invalid', async () => {
     try {
       expect(Version.infer('path/to/', __dirname)).toThrow()
     } catch (error) {
