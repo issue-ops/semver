@@ -1,0 +1,19 @@
+name: The name of your action here
+description: Provide a description here
+author: Your name or organization here
+
+inputs:
+  who-to-greet:
+    description: Your input description here
+    required: true
+    default: World
+
+outputs:
+  greeting:
+    description: Your output description here
+
+runs:
+  using: docker
+  image: docker://ghcr.io/actions/container-prebuilt-action:latest
+  env:
+    INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}

@@ -17433,11 +17433,28 @@ class Version {
         const items = manifestPath.split('/');
         const manifestFile = items[items.length - 1];
         coreExports.info(`Manifest file: ${manifestFile}`);
+        // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+        const regex = /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm;
         if (manifestFile === '')
             throw new Error(`Invalid manifest path: ${manifestPath}`);
         // Functions for parsing each type of manifest file
-        // eslint-disable-next-line no-unused-vars
         const parser = {
+            'action.yml': (body) => {
+                return YAML
+                    .parse(body)
+                    .runs?.image?.split(':')
+                    ?.slice(-1)?.[0]
+                    .match(regex)?.[0]
+                    .replace('v', '');
+            },
+            'action.yaml': (body) => {
+                return YAML
+                    .parse(body)
+                    .runs?.image?.split(':')
+                    ?.slice(-1)?.[0]
+                    .match(regex)?.[0]
+                    .replace('v', '');
+            },
             'package.json': (body) => {
                 return JSON.parse(body).version;
             },
@@ -17461,8 +17478,7 @@ class Version {
                 return yamlBody.version;
             },
             '.version': (body) => {
-                // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-                return body.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/gm)?.[0];
+                return body.match(regex)?.[0]?.replace('v', '');
             }
         };
         try {
