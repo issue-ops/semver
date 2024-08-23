@@ -17617,7 +17617,7 @@ async function run() {
     const ref = coreExports.getInput('ref');
     const useVersion = coreExports.getInput('use-version');
     const workspace = coreExports.getInput('workspace');
-    const push = coreExports.getInput('push') === 'true';
+    const push = coreExports.getInput('push-tags') === 'true';
     if ((manifestPath === '' && useVersion === '') ||
         (manifestPath !== '' && useVersion !== ''))
         return coreExports.setFailed('Must provide manifest-path OR use-version');

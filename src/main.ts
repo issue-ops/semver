@@ -9,7 +9,7 @@ export async function run() {
   const ref: string = core.getInput('ref')
   const useVersion: string = core.getInput('use-version')
   const workspace: string = core.getInput('workspace')
-  const push: boolean = core.getInput('push') === 'true'
+  const push: boolean = core.getInput('push-tags') === 'true'
 
   if (
     (manifestPath === '' && useVersion === '') ||
