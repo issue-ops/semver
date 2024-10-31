@@ -23,7 +23,7 @@ describe('messages', () => {
         data: [
           {
             id: 1,
-            body: 'test comment\n\n<!-- senver: workflow=${{ github.workflow }} -->'
+            body: 'test comment\n\n<!-- semver: workflow=workflow-name -->'
           }
         ]
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,7 +50,7 @@ describe('messages', () => {
         data: [
           {
             id: 1,
-            body: 'test comment\n\n<!-- senver: workflow=${{ github.workflow }} -->'
+            body: 'test comment\n\n<!-- semver: workflow=workflow-name -->'
           }
         ]
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,7 +66,7 @@ describe('messages', () => {
         data: [
           {
             id: 1,
-            body: 'test comment\n\n<!-- senver: workflow=${{ github.workflow }} -->'
+            body: 'test comment\n\n<!-- semver: workflow=workflow-name -->'
           }
         ]
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

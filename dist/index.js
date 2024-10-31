@@ -30462,7 +30462,7 @@ var githubExports = requireGithub();
 async function getCommentId() {
     const octokit = githubExports.getOctokit(process.env.GITHUB_TOKEN);
     // Unique identifier for the version check comment.
-    const identifier = '<!-- senver: workflow=${{ github.workflow }} -->';
+    const identifier = `<!-- semver: workflow=${githubExports.context.workflow} -->`;
     // If no existing comment is found, set the result to undefined.
     let commentId = undefined;
     const response = await octokit.rest.issues.listComments({

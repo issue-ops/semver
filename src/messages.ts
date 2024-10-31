@@ -10,7 +10,7 @@ export async function getCommentId(): Promise<number | undefined> {
   const octokit = github.getOctokit(process.env.GITHUB_TOKEN as string)
 
   // Unique identifier for the version check comment.
-  const identifier = '<!-- senver: workflow=${{ github.workflow }} -->'
+  const identifier = `<!-- semver: workflow=${github.context.workflow} -->`
 
   // If no existing comment is found, set the result to undefined.
   let commentId: number | undefined = undefined

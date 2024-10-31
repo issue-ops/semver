@@ -12,5 +12,6 @@ export const context = {
   },
   issue: {
     number: 1
-  }
+  },
+  workflow: 'workflow-name'
 }
