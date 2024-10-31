@@ -45672,7 +45672,7 @@ async function run() {
     const exists = await version.exists(workspace, allowPrerelease);
     /* istanbul ignore next */
     if (githubExports.context?.issue?.number !== undefined)
-        await versionCheckComment(exists, manifestPath);
+        await versionCheckComment(!exists, manifestPath);
     // Fail if checkOnly is true and the version exists.
     if (checkOnly && exists)
         return coreExports.setFailed("Version exists and 'check-only' is true");

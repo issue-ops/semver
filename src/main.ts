@@ -42,7 +42,7 @@ export async function run() {
 
   /* istanbul ignore next */
   if (github.context?.issue?.number !== undefined)
-    await versionCheckComment(exists, manifestPath)
+    await versionCheckComment(!exists, manifestPath)
 
   // Fail if checkOnly is true and the version exists.
   if (checkOnly && exists)
