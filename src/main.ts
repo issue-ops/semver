@@ -47,7 +47,7 @@ export async function run() {
   // Fail if not running in checkOnly mode, not allowing overwrites, and the
   // version exists.
   if (!checkOnly && !overwrite && exists)
-    return core.setFailed("Version already exists and 'overwrite' is false")
+    return core.setFailed("Version exists and 'overwrite' is false")
 
   // If not running in checkOnly mode, tag and push the version in the
   // workspace. Otherwise, just output the version information.

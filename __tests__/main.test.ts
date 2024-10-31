@@ -216,7 +216,7 @@ describe('main', () => {
     await main.run()
 
     expect(core.setFailed).toHaveBeenCalledWith(
-      "Version already exists and 'overwrite' is false"
+      "Version exists and 'overwrite' is false"
     )
   })
 
