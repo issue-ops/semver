@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { versionCheckComment } from './messages.js'
 import { Version } from './version.js'
 
 export async function run() {
@@ -33,21 +34,24 @@ export async function run() {
     : Version.infer(manifestPath, workspace)
 
   if (version === undefined) return core.setFailed('Could not infer version')
-
-  // Stop now if we're only checking the version.
-  if (checkOnly && (await version.exists(workspace, allowPrerelease)))
-    return core.setFailed("Version already exists and 'check-only' is true")
-
-  // Check if the tags already exist in the repository.
-  if (!checkOnly && !overwrite && (await version.exists(workspace, false)))
-    return core.setFailed("Version already exists and 'overwrite' is false")
-
   core.info(`Inferred Version: ${version.toString()}`)
-  core.info(`Tagging ${ref} with version ${version.toString()}`)
+
+  // Check if the version exists.
+  const exists = await version.exists(workspace, allowPrerelease)
+  await versionCheckComment(exists, manifestPath)
+
+  // Fail if checkOnly is true and the version exists.
+  if (checkOnly && exists)
+    return core.setFailed("Version exists and 'check-only' is true")
+
+  // Fail if not running in checkOnly mode, not allowing overwrites, and the
+  // version exists.
+  if (!checkOnly && !overwrite && exists)
+    return core.setFailed("Version already exists and 'overwrite' is false")
 
   // If not running in checkOnly mode, tag and push the version in the
   // workspace. Otherwise, just output the version information.
-  /* istanbul ignore next */
+  /* istanbul ignore else */
   if (!checkOnly) await version.tag(ref, workspace, push)
   else core.info("Version does not exist and 'check-only' is true")
 
@@ -62,6 +66,7 @@ export async function run() {
   core.setOutput('major', version.major)
   core.setOutput('minor', version.minor)
   core.setOutput('patch', version.patch)
+
   if (version.prerelease) core.setOutput('prerelease', version.prerelease)
   if (version.build) core.setOutput('build', version.build)
 }

@@ -22,7 +22,8 @@ export const rest = {
     get: jest.fn(),
     listComments: jest.fn(),
     removeLabel: jest.fn(),
-    update: jest.fn()
+    update: jest.fn(),
+    updateComment: jest.fn()
   },
   orgs: {
     checkMembershipForUser: jest.fn()
