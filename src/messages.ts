@@ -44,14 +44,14 @@ export async function versionCheckComment(
     '### Semantic Version Check Passed :white_check_mark:',
     `Version in manifest file \`${manifestPath}\` is valid.`,
     'This comment will be automatically updated as changes are pushed to this PR branch.',
-    '<!-- semver: workflow=${{ github.workflow }} -->'
+    `<!-- semver: workflow=${github.context.workflow} -->`
   ].join('\n\n')
 
   const failureBody = [
     '### Semantic Version Check Failed :x:',
     `Version in manifest file \`${manifestPath}\` has already been published. Please increment the version in the manifest file before attempting to merge this pull request.`,
     'This comment will be automatically updated as changes are pushed to this PR branch.',
-    '<!-- semver: workflow=${{ github.workflow }} -->'
+    `<!-- semver: workflow=${github.context.workflow} -->`
   ].join('\n\n')
 
   // Update the existing comment, or create a new one.
