@@ -42,6 +42,10 @@ inputs:
       The Git ref to tag with the specified or inferred version. This defaults
       to the base ref of a pull request event trigger.
     required: false
+  token:
+    description: GitHub token for authentication
+    required: true
+    default: ${{ github.token }}
   use-version:
     description:
       The version you want to explicitly use (e.g. '1.2.3-beta.4+build.5'). This

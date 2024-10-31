@@ -1,15 +1,18 @@
 import { jest } from '@jest/globals'
+import * as core from '../__fixtures__/core.js'
 import * as github from '../__fixtures__/github.js'
 
 jest.unstable_mockModule('@actions/github', () => github)
+jest.unstable_mockModule('@actions/core', () => core)
 
 const messages = await import('../src/messages.js')
 
 const { getOctokit } = await import('@actions/github')
-const mocktokit = jest.mocked(getOctokit(process.env.GITHUB_TOKEN as string))
+const mocktokit = jest.mocked(getOctokit('MY_TOKEN'))
 
 describe('messages', () => {
   beforeEach(() => {
+    core.getInput.mockReturnValue('MY_TOKEN')
     process.env.GITHUB_REPOSITORY = 'issue-ops/semver'
   })
 
