@@ -40,11 +40,10 @@ export async function run() {
   // Check if the version exists.
   const exists = await version.exists(workspace, allowPrerelease)
 
-  // Only add the comment if this is a PR event.
   /* istanbul ignore next */
   if (
     github.context.issue?.number !== undefined &&
-    github.context.eventName !== 'pull_request' &&
+    github.context.eventName === 'pull_request' &&
     github.context.payload?.action !== 'closed'
   )
     await versionCheckComment(!exists, manifestPath)
