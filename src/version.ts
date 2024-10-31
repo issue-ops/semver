@@ -192,6 +192,8 @@ export class Version {
    * @param push Whether or not to push the tags to the remote
    */
   async tag(ref: string, workspace: string, push: boolean): Promise<void> {
+    core.info(`Tagging ${ref} with version ${this.toString()}`)
+
     const tagOptions: TagOptions = new TagOptions(workspace)
     const tags: string[] = []
 

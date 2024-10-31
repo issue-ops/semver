@@ -31,6 +31,12 @@ jest.unstable_mockModule('../src/version.js', async () => {
     Version
   }
 })
+jest.unstable_mockModule('../src/messages.js', async () => {
+  return {
+    getCommentId: jest.fn(),
+    versionCheckComment: jest.fn()
+  }
+})
 
 const main = await import('../src/main.js')
 const { Version } = await import('../src/version.js')
@@ -210,7 +216,7 @@ describe('main', () => {
     await main.run()
 
     expect(core.setFailed).toHaveBeenCalledWith(
-      "Version already exists and 'overwrite' is false"
+      "Version exists and 'overwrite' is false"
     )
   })
 
@@ -243,7 +249,7 @@ describe('main', () => {
     await main.run()
 
     expect(core.setFailed).toHaveBeenCalledWith(
-      "Version already exists and 'check-only' is true"
+      "Version exists and 'check-only' is true"
     )
   })
 })

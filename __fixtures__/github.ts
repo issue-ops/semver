@@ -7,7 +7,11 @@ export const context = {
   job: 'job-name',
   payload: {},
   repo: {
-    owner: 'USPS',
-    repo: 'fast-track-deployment-manifest-action'
-  }
+    owner: 'issue-ops',
+    repo: 'semver'
+  },
+  issue: {
+    number: 1
+  },
+  workflow: 'workflow-name'
 }
