@@ -45670,8 +45670,11 @@ async function run() {
     coreExports.info(`Inferred Version: ${version.toString()}`);
     // Check if the version exists.
     const exists = await version.exists(workspace, allowPrerelease);
+    // Only add the comment if this is a PR event.
     /* istanbul ignore next */
-    if (githubExports.context?.issue?.number !== undefined)
+    if (githubExports.context.issue?.number !== undefined &&
+        githubExports.context.eventName !== 'pull_request' &&
+        githubExports.context.payload?.action !== 'closed')
         await versionCheckComment(!exists, manifestPath);
     // Fail if checkOnly is true and the version exists.
     if (checkOnly && exists)
