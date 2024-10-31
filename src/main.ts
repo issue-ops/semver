@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import { versionCheckComment } from './messages.js'
 import { Version } from './version.js'
 
@@ -38,7 +39,10 @@ export async function run() {
 
   // Check if the version exists.
   const exists = await version.exists(workspace, allowPrerelease)
-  await versionCheckComment(exists, manifestPath)
+
+  /* istanbul ignore next */
+  if (github.context?.issue?.number !== undefined)
+    await versionCheckComment(exists, manifestPath)
 
   // Fail if checkOnly is true and the version exists.
   if (checkOnly && exists)

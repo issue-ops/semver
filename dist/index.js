@@ -45670,7 +45670,9 @@ async function run() {
     coreExports.info(`Inferred Version: ${version.toString()}`);
     // Check if the version exists.
     const exists = await version.exists(workspace, allowPrerelease);
-    await versionCheckComment(exists, manifestPath);
+    /* istanbul ignore next */
+    if (githubExports.context?.issue?.number !== undefined)
+        await versionCheckComment(exists, manifestPath);
     // Fail if checkOnly is true and the version exists.
     if (checkOnly && exists)
         return coreExports.setFailed("Version exists and 'check-only' is true");

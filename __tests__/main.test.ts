@@ -52,6 +52,8 @@ describe('main', () => {
       .mockReturnValueOnce('refs/heads/main') // ref
       .mockReturnValueOnce('') // use-version
       .mockReturnValueOnce('.') // workspace
+
+    process.env.GITHUB_REPOSITORY = 'issue-ops/semver'
   })
 
   afterEach(() => {
