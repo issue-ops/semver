@@ -1,11 +1,11 @@
 # SemVer Action
 
-[![Check dist/](https://github.com/issue-ops/semver/actions/workflows/check-dist.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/issue-ops/semver/actions/workflows/codeql.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/codeql.yml)
-[![Continuous Integration](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml)
-[![Continuous Delivery](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml)
-[![Linter](https://github.com/issue-ops/semver/actions/workflows/linter.yml/badge.svg)](https://github.com/issue-ops/semver/actions/workflows/linter.yml)
-[![Code Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+![Check dist/](https://github.com/issue-ops/semver/actions/workflows/check-dist.yml/badge.svg)
+![CodeQL](https://github.com/issue-ops/semver/actions/workflows/codeql.yml/badge.svg)
+![Continuous Integration](https://github.com/issue-ops/semver/actions/workflows/continuous-integration.yml/badge.svg)
+![Continuous Delivery](https://github.com/issue-ops/semver/actions/workflows/continuous-delivery.yml/badge.svg)
+![Linter](https://github.com/issue-ops/semver/actions/workflows/linter.yml/badge.svg)
+![Code Coverage](./badges/coverage.svg)
 
 > [!IMPORTANT]
 >
@@ -27,9 +27,10 @@ type of manifest file located. This action currently supports the following:
 
 > [!TIP]
 >
-> If your project type/language is not available, you can create a generic
-> `.version` file in your repository and refer to that! The `.version` file
-> should only contain the version information.
+> If your project type/language is not available, please submit an issue! In the
+> meantime, you can create a generic `.version` file in your repository and
+> refer to that! The `.version` file should only contain the version
+> information.
 
 Once a version has been located, this action automatically creates or updates
 the following tags to point to the specified `ref`, depending on if this is a
@@ -77,11 +78,13 @@ jobs:
     if: ${{ github.event.pull_request.merged == true }}
 
     steps:
-      # Checkout the repository with fetch-tags set to true
+      # Checkout the repository with fetch-depth set to 0 and fetch-tags set to
+      # true
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Tag Commit
@@ -96,31 +99,28 @@ jobs:
         run: echo ${{ steps.tag-commit.outputs.version }}
 ```
 
+## Pull Requests
+
+When run as part of a pull request, this action will automatically add a comment
+indicating if the version in the manifest file is valid or conflicts with an
+existing version. This can be used as an additional check to ensure that the
+version is updated when new features are released.
+
 ## Inputs
 
-| Input              | Description                                            |
-| ------------------ | ------------------------------------------------------ |
-| `allow-prerelease` | If `check-only` is `'true'`, this controls if the      |
-|                    | check should pass if a matching prerelease version is  |
-|                    | detected (e.g. `v1.0.0-SNAPSHOT`)                      |
-|                    | Default: `'true'`                                      |
-| `check-only`       | If set to `'true'`, only checks if the version exists. |
-|                    | Fails the action if the version already exists.        |
-|                    | Default: `'false'`                                     |
-| `manifest-path`    | The path to the manifest that contains the version.    |
-|                    | Relative to the root of the repository.                |
-|                    | If not set, `use-version` must be set.                 |
-| `overwrite`        | Set to `'true'` to overwrite existing tags.            |
-|                    | Default: `'false'`                                     |
-| `push-tags`        | Set to `'true'` to push tags to the repository.        |
-|                    | Default: `'true'`                                      |
-| `ref`              | The Git ref to tag.                                    |
-|                    | Defaults to the base ref of a pull request trigger.    |
-| `use-version`      | The version you want to explicitly use.                |
-|                    | This must follow SemVer 2.0 standards.                 |
-|                    | If not set, `manifest-path` must be set.               |
-| `workspace`        | The path where the repository has been cloned.         |
-|                    | Default: `${{ github.workspace }}`                     |
+| Input              | Default                   | Description                                                                                                                                |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `allow-prerelease` | `'true'`                  | If `check-only` is `'true'`, this controls if the check should pass if a matching prerelease version is detected (e.g. `v1.0.0-SNAPSHOT`). |
+| `check-only`       | `'false'`                 | If set to `'true'`, only checks if the version exists. Fails the action if the version already exists.                                     |
+| `manifest-path`    |                           | The path to the manifest that contains the version (relative to the root of the repository).                                               |
+|                    |                           | If not set, `use-version` must be set.                                                                                                     |
+| `overwrite`        | `'false'`                 | Set to `'true'` to overwrite existing tags.                                                                                                |
+| `push-tags`        | `'true'`                  | Set to `'true'` to push tags to the repository.                                                                                            |
+| `ref`              | `${{ github.base_ref }}`  | The Git ref to tag.                                                                                                                        |
+| `token`            | `${{ github.token }}`     | The GitHub token to use for authentication.                                                                                                |
+| `use-version`      |                           | The version you want to explicitly use. This must follow SemVer 2.0 standards.                                                             |
+|                    |                           | If not set, `manifest-path` must be set.                                                                                                   |
+| `workspace`        | `${{ github.workspace }}` | The path where the repository has been cloned.                                                                                             |
 
 ## Outputs
 
