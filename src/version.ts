@@ -180,7 +180,9 @@ export class Version {
       if (error.code === 'ENOENT') {
         core.error('Manifest not found')
         return undefined
-      } else throw error
+      }
+
+      throw error
     }
   }
 
@@ -317,7 +319,6 @@ export class Version {
       return false
     }
 
-    if (tagOptions.stdout.includes(this.toString(true))) return true
-    else return false
+    return tagOptions.stdout.includes(this.toString(true))
   }
 }

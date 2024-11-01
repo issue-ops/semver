@@ -40,6 +40,8 @@ export async function run() {
   // Check if the version exists.
   const exists = await version.exists(workspace, allowPrerelease)
 
+  // If this is a pull request event, comment on the PR with the version check
+  // result.
   /* istanbul ignore next */
   if (
     github.context.issue?.number !== undefined &&

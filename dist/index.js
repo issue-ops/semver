@@ -45112,8 +45112,7 @@ class Version {
                 coreExports.error('Manifest not found');
                 return undefined;
             }
-            else
-                throw error;
+            throw error;
         }
     }
     /**
@@ -45219,10 +45218,7 @@ class Version {
             coreExports.info('Prerelease version conflict allowed');
             return false;
         }
-        if (tagOptions.stdout.includes(this.toString(true)))
-            return true;
-        else
-            return false;
+        return tagOptions.stdout.includes(this.toString(true));
     }
 }
 
@@ -45256,6 +45252,8 @@ async function run() {
     coreExports.info(`Inferred Version: ${version.toString()}`);
     // Check if the version exists.
     const exists = await version.exists(workspace, allowPrerelease);
+    // If this is a pull request event, comment on the PR with the version check
+    // result.
     /* istanbul ignore next */
     if (githubExports.context.issue?.number !== undefined &&
         githubExports.context.eventName === 'pull_request' &&
