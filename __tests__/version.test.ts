@@ -40,6 +40,7 @@ describe('version.ts', () => {
     try {
       // Pass an invalid version
       expect(new Version('....')).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -169,6 +170,7 @@ describe('version.ts', () => {
       expect(
         Version.infer('./fixtures/invalid/unreadable/package.json', __dirname)
       ).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -177,7 +179,6 @@ describe('version.ts', () => {
   it('Returns undefined if a manifest file is not found', async () => {
     // Mock the readFileSync function to throw an error
     jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
-      // eslint-disable-next-line no-throw-literal
       throw {
         message: 'File not found',
         code: 'ENOENT'
@@ -192,24 +193,28 @@ describe('version.ts', () => {
   it('Throws an error if a manifest path is invalid', async () => {
     try {
       expect(Version.infer('path/to/', __dirname)).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
 
     try {
       expect(Version.infer('///', __dirname)).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
 
     try {
       expect(Version.infer('/', __dirname)).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
 
     try {
       expect(Version.infer('', __dirname)).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -399,6 +404,7 @@ describe('version.ts', () => {
       expect(
         await version.tag('main', `${__dirname}/fixtures/valid`, true)
       ).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -433,6 +439,7 @@ describe('version.ts', () => {
       expect(
         await version.tag('main', `${__dirname}/fixtures/valid`, true)
       ).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -475,6 +482,7 @@ describe('version.ts', () => {
       expect(
         await version.tag('main', `${__dirname}/fixtures/valid`, true)
       ).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
@@ -521,6 +529,7 @@ describe('version.ts', () => {
       expect(
         await version.tag('main', `${__dirname}/fixtures/valid`, true)
       ).toThrow()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Do nothing
     }
