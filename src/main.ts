@@ -12,6 +12,7 @@ export async function run() {
   const useVersion: string = core.getInput('use-version')
   const workspace: string = core.getInput('workspace')
   const push: boolean = core.getInput('push-tags') === 'true'
+  const comment: boolean = core.getInput('comment') === 'true'
 
   if (
     (manifestPath === '' && useVersion === '') ||
@@ -46,7 +47,8 @@ export async function run() {
   if (
     github.context.issue?.number !== undefined &&
     github.context.eventName === 'pull_request' &&
-    github.context.payload?.action !== 'closed'
+    github.context.payload?.action !== 'closed' &&
+    comment
   )
     await versionCheckComment(!exists, manifestPath)
 

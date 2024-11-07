@@ -112,6 +112,7 @@ version is updated when new features are released.
 | ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `allow-prerelease` | `'true'`                  | If `check-only` is `'true'`, this controls if the check should pass if a matching prerelease version is detected (e.g. `v1.0.0-SNAPSHOT`). |
 | `check-only`       | `'false'`                 | If set to `'true'`, only checks if the version exists. Fails the action if the version already exists.                                     |
+| `comment`          | `'true'`                  | If set to `'true'`, a comment will be added to the pull request indicating if the version is valid or conflicts with an existing version.  |
 | `manifest-path`    |                           | The path to the manifest that contains the version (relative to the root of the repository).                                               |
 |                    |                           | If not set, `use-version` must be set.                                                                                                     |
 | `overwrite`        | `'false'`                 | Set to `'true'` to overwrite existing tags.                                                                                                |

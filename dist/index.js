@@ -45231,6 +45231,7 @@ async function run() {
     const useVersion = coreExports.getInput('use-version');
     const workspace = coreExports.getInput('workspace');
     const push = coreExports.getInput('push-tags') === 'true';
+    const comment = coreExports.getInput('comment') === 'true';
     if ((manifestPath === '' && useVersion === '') ||
         (manifestPath !== '' && useVersion !== ''))
         return coreExports.setFailed('Must provide manifest-path OR use-version');
@@ -45257,7 +45258,8 @@ async function run() {
     /* istanbul ignore next */
     if (githubExports.context.issue?.number !== undefined &&
         githubExports.context.eventName === 'pull_request' &&
-        githubExports.context.payload?.action !== 'closed')
+        githubExports.context.payload?.action !== 'closed' &&
+        comment)
         await versionCheckComment(!exists, manifestPath);
     // Fail if checkOnly is true and the version exists.
     if (checkOnly && exists)
