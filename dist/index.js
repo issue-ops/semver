@@ -27955,7 +27955,7 @@ function withDefaults$2(oldDefaults, newDefaults) {
 
 const endpoint = withDefaults$2(null, DEFAULTS);
 
-const VERSION$4 = "8.4.0";
+const VERSION$4 = "8.4.1";
 
 function isPlainObject(value) {
   if (typeof value !== "object" || value === null)
@@ -28171,7 +28171,7 @@ function fetchWrapper(requestOptions) {
       headers[keyAndValue[0]] = keyAndValue[1];
     }
     if ("deprecation" in headers) {
-      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const matches = headers.link && headers.link.match(/<([^<>]+)>; rel="deprecation"/);
       const deprecationLink = matches && matches.pop();
       log.warn(
         `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
