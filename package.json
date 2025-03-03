@@ -44,7 +44,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
     "@octokit/rest": "^21.1.1",
-    "fast-xml-parser": "^4.5.1",
+    "fast-xml-parser": "^5.0.8",
     "toml": "^3.0.0",
     "yaml": "^2.7.0"
   },
