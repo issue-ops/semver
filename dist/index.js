@@ -27311,6 +27311,7 @@ function requireContext () {
 	        this.action = process.env.GITHUB_ACTION;
 	        this.actor = process.env.GITHUB_ACTOR;
 	        this.job = process.env.GITHUB_JOB;
+	        this.runAttempt = parseInt(process.env.GITHUB_RUN_ATTEMPT, 10);
 	        this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
 	        this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
 	        this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
@@ -31844,7 +31845,7 @@ function readDocType(xmlData, i){
         let exp = "";
         for(;i<xmlData.length;i++){
             if (xmlData[i] === '<' && !comment) { //Determine the tag type
-                if( hasBody && isEntity(xmlData, i)){
+                if( hasBody && hasSeq(xmlData, "!ENTITY",i)){
                     i += 7; 
                     let entityName, val;
                     [entityName, val,i] = readEntityExp(xmlData,i+1);
@@ -31854,20 +31855,20 @@ function readDocType(xmlData, i){
                             val: val
                         };
                 }
-                else if( hasBody && isElement(xmlData, i))  {
+                else if( hasBody && hasSeq(xmlData, "!ELEMENT",i))  {
                     i += 8;//Not supported
                     const {index} = readElementExp(xmlData,i+1);
                     i = index;
-                }else if( hasBody && isAttlist(xmlData, i)){
+                }else if( hasBody && hasSeq(xmlData, "!ATTLIST",i)){
                     i += 8;//Not supported
                     // const {index} = readAttlistExp(xmlData,i+1);
                     // i = index;
-                }else if( hasBody && isNotation(xmlData, i)) {
+                }else if( hasBody && hasSeq(xmlData, "!NOTATION",i)) {
                     i += 9;//Not supported
                     const {index} = readNotationExp(xmlData,i+1);
                     i = index;
-                }else if( isComment) comment = true;
-                else throw new Error("Invalid DOCTYPE");
+                }else if( hasSeq(xmlData, "!--",i) ) comment = true;
+                else throw new Error(`Invalid DOCTYPE`);
 
                 angleBracketsCount++;
                 exp = "";
@@ -32015,8 +32016,12 @@ function readIdentifierVal(xmlData, i, type) {
 }
 
 function readElementExp(xmlData, i) {
+    // <!ELEMENT br EMPTY>
+    // <!ELEMENT div ANY>
+    // <!ELEMENT title (#PCDATA)>
+    // <!ELEMENT book (title, author+)>
     // <!ELEMENT name (content-model)>
-
+    
     // Skip leading whitespace after <!ELEMENT
     i = skipWhitespace(xmlData, i);
 
@@ -32034,24 +32039,26 @@ function readElementExp(xmlData, i) {
 
     // Skip whitespace after element name
     i = skipWhitespace(xmlData, i);
-
-    // Expect '(' to start content model
-    if (xmlData[i] !== "(") {
-        throw new Error(`Expected '(', found "${xmlData[i]}"`);
-    }
-    i++; // Move past '('
-
-    // Read content model
     let contentModel = "";
-    while (i < xmlData.length && xmlData[i] !== ")") {
-        contentModel += xmlData[i];
-        i++;
-    }
+    // Expect '(' to start content model
+    if(xmlData[i] === "E" && hasSeq(xmlData, "MPTY",i)) i+=4;
+    else if(xmlData[i] === "A" && hasSeq(xmlData, "NY",i)) i+=2;
+    else if (xmlData[i] === "(") {
+        i++; // Move past '('
 
-    if (xmlData[i] !== ")") {
-        throw new Error("Unterminated content model");
-    }
+        // Read content model
+        while (i < xmlData.length && xmlData[i] !== ")") {
+            contentModel += xmlData[i];
+            i++;
+        }
+        if (xmlData[i] !== ")") {
+            throw new Error("Unterminated content model");
+        }
 
+    }else {
+        throw new Error(`Invalid Element Expression, found "${xmlData[i]}"`);
+    }
+    
     return {
         elementName,
         contentModel: contentModel.trim(),
@@ -32059,56 +32066,11 @@ function readElementExp(xmlData, i) {
     };
 }
 
-function isComment(xmlData, i){
-    if(xmlData[i+1] === '!' &&
-    xmlData[i+2] === '-' &&
-    xmlData[i+3] === '-') return true
-    return false
-}
-function isEntity(xmlData, i){
-    if(xmlData[i+1] === '!' &&
-    xmlData[i+2] === 'E' &&
-    xmlData[i+3] === 'N' &&
-    xmlData[i+4] === 'T' &&
-    xmlData[i+5] === 'I' &&
-    xmlData[i+6] === 'T' &&
-    xmlData[i+7] === 'Y') return true
-    return false
-}
-function isElement(xmlData, i){
-    if(xmlData[i+1] === '!' &&
-    xmlData[i+2] === 'E' &&
-    xmlData[i+3] === 'L' &&
-    xmlData[i+4] === 'E' &&
-    xmlData[i+5] === 'M' &&
-    xmlData[i+6] === 'E' &&
-    xmlData[i+7] === 'N' &&
-    xmlData[i+8] === 'T') return true
-    return false
-}
-
-function isAttlist(xmlData, i){
-    if(xmlData[i+1] === '!' &&
-    xmlData[i+2] === 'A' &&
-    xmlData[i+3] === 'T' &&
-    xmlData[i+4] === 'T' &&
-    xmlData[i+5] === 'L' &&
-    xmlData[i+6] === 'I' &&
-    xmlData[i+7] === 'S' &&
-    xmlData[i+8] === 'T') return true
-    return false
-}
-function isNotation(xmlData, i){
-    if(xmlData[i+1] === '!' &&
-    xmlData[i+2] === 'N' &&
-    xmlData[i+3] === 'O' &&
-    xmlData[i+4] === 'T' &&
-    xmlData[i+5] === 'A' &&
-    xmlData[i+6] === 'T' &&
-    xmlData[i+7] === 'I' &&
-    xmlData[i+8] === 'O' &&
-    xmlData[i+9] === 'N') return true
-    return false
+function hasSeq(data, seq,i){
+    for(let j=0;j<seq.length;j++){
+        if(seq[j]!==data[i+j+1]) return false;
+    }
+    return true;
 }
 
 function validateEntityName(name){
@@ -32145,22 +32107,8 @@ function toNumber(str, options = {}){
         return parse_int(trimmedStr, 16);
     // }else if (options.oct && octRegex.test(str)) {
     //     return Number.parseInt(val, 8);
-    }else if (trimmedStr.search(/[eE]/)!== -1) { //eNotation
-        const notation = trimmedStr.match(/^([-\+])?(0*)([0-9]*(\.[0-9]*)?[eE][-\+]?[0-9]+)$/); 
-        // +00.123 => [ , '+', '00', '.123', ..
-        if(notation){
-            // console.log(notation)
-            if(options.leadingZeros){ //accept with leading zeros
-                trimmedStr = (notation[1] || "") + notation[3];
-            }else {
-                if(notation[2] === "0" && notation[3][0]=== ".");else {
-                    return str;
-                }
-            }
-            return options.eNotation ? Number(trimmedStr) : str;
-        }else {
-            return str;
-        }
+    }else if (trimmedStr.search(/.+[eE].+/)!== -1) { //eNotation
+        return resolveEnotation(str,trimmedStr,options);
     // }else if (options.parseBin && binRegex.test(str)) {
     //     return Number.parseInt(val, 2);
     }else {
@@ -32168,38 +32116,73 @@ function toNumber(str, options = {}){
         const match = numRegex.exec(trimmedStr);
         // +00.123 => [ , '+', '00', '.123', ..
         if(match){
-            const sign = match[1];
+            const sign = match[1] || "";
             const leadingZeros = match[2];
             let numTrimmedByZeros = trimZeros(match[3]); //complete num without leading zeros
+            const decimalAdjacentToLeadingZeros = sign ? // 0., -00., 000.
+                str[leadingZeros.length+1] === "." 
+                : str[leadingZeros.length] === ".";
+
             //trim ending zeros for floating number
-            
-            if(!options.leadingZeros && leadingZeros.length > 0 && sign && trimmedStr[2] !== ".") return str; //-0123
-            else if(!options.leadingZeros && leadingZeros.length > 0 && !sign && trimmedStr[1] !== ".") return str; //0123
-            else if(options.leadingZeros && leadingZeros===str) return 0; //00
-            
+            if(!options.leadingZeros //leading zeros are not allowed
+                && (leadingZeros.length > 1 
+                    || (leadingZeros.length === 1 && !decimalAdjacentToLeadingZeros))){
+                // 00, 00.3, +03.24, 03, 03.24
+                return str;
+            }
             else {//no leading zeros or leading zeros are allowed
                 const num = Number(trimmedStr);
-                const numStr = "" + num;
+                const parsedStr = String(num);
 
-                if(numStr.search(/[eE]/) !== -1){ //given number is long and parsed to eNotation
+                if( num === 0) return num;
+                if(parsedStr.search(/[eE]/) !== -1){ //given number is long and parsed to eNotation
                     if(options.eNotation) return num;
                     else return str;
                 }else if(trimmedStr.indexOf(".") !== -1){ //floating number
-                    if(numStr === "0" && (numTrimmedByZeros === "") ) return num; //0.0
-                    else if(numStr === numTrimmedByZeros) return num; //0.456. 0.79000
-                    else if( sign && numStr === "-"+numTrimmedByZeros) return num;
+                    if(parsedStr === "0") return num; //0.0
+                    else if(parsedStr === numTrimmedByZeros) return num; //0.456. 0.79000
+                    else if( parsedStr === `${sign}${numTrimmedByZeros}`) return num;
                     else return str;
                 }
                 
+                let n = leadingZeros? numTrimmedByZeros : trimmedStr;
                 if(leadingZeros){
-                    return (numTrimmedByZeros === numStr) || (sign+numTrimmedByZeros === numStr) ? num : str
+                    // -009 => -9
+                    return (n === parsedStr) || (sign+n === parsedStr) ? num : str
                 }else  {
-                    return (trimmedStr === numStr) || (trimmedStr === sign+numStr) ? num : str
+                    // +9
+                    return (n === parsedStr) || (n === sign+parsedStr) ? num : str
                 }
             }
         }else { //non-numeric string
             return str;
         }
+    }
+}
+
+const eNotationRegx = /^([-+])?(0*)(\d*(\.\d*)?[eE][-\+]?\d+)$/;
+function resolveEnotation(str,trimmedStr,options){
+    if(!options.eNotation) return str;
+    const notation = trimmedStr.match(eNotationRegx); 
+    if(notation){
+        let sign = notation[1] || "";
+        const eChar = notation[3].indexOf("e") === -1 ? "E" : "e";
+        const leadingZeros = notation[2];
+        const eAdjacentToLeadingZeros = sign ? // 0E.
+            str[leadingZeros.length+1] === eChar 
+            : str[leadingZeros.length] === eChar;
+
+        if(leadingZeros.length > 1 && eAdjacentToLeadingZeros) return str;
+        else if(leadingZeros.length === 1 
+            && (notation[3].startsWith(`.${eChar}`) || notation[3][0] === eChar)){
+                return Number(trimmedStr);
+        }else if(options.leadingZeros && !eAdjacentToLeadingZeros){ //accept with leading zeros
+            //remove leading 0s
+            trimmedStr = (notation[1] || "") + notation[3];
+            return Number(trimmedStr);
+        }else return str;
+    }else {
+        return str;
     }
 }
 
@@ -32213,7 +32196,7 @@ function trimZeros(numStr){
         numStr = numStr.replace(/0+$/, ""); //remove ending zeros
         if(numStr === ".")  numStr = "0";
         else if(numStr[0] === ".")  numStr = "0"+numStr;
-        else if(numStr[numStr.length-1] === ".")  numStr = numStr.substr(0,numStr.length-1);
+        else if(numStr[numStr.length-1] === ".")  numStr = numStr.substring(0,numStr.length-1);
         return numStr;
     }
     return numStr;
