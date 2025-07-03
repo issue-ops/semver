@@ -44804,6 +44804,7 @@ class Version {
 
 async function run() {
     const allowPrerelease = coreExports.getInput('allow-prerelease') === 'true';
+    const apiUrl = coreExports.getInput('api_url', { required: true });
     const checkOnly = coreExports.getInput('check-only') === 'true';
     const manifestPath = coreExports.getInput('manifest-path');
     const overwrite = coreExports.getInput('overwrite') === 'true';
@@ -44817,6 +44818,7 @@ async function run() {
         return coreExports.setFailed('Must provide manifest-path OR use-version');
     coreExports.info('Running action with inputs:');
     coreExports.info(`\tAllow Prerelease: ${allowPrerelease}`);
+    coreExports.info(`\tAPI URL: ${apiUrl}`);
     coreExports.info(`\tCheck: ${checkOnly}`);
     coreExports.info(`\tManifest Path: ${manifestPath}`);
     coreExports.info(`\tOverwrite: ${overwrite}`);

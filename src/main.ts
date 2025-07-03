@@ -5,6 +5,7 @@ import { Version } from './version.js'
 
 export async function run() {
   const allowPrerelease: boolean = core.getInput('allow-prerelease') === 'true'
+  const apiUrl: string = core.getInput('api_url', { required: true })
   const checkOnly: boolean = core.getInput('check-only') === 'true'
   const manifestPath: string = core.getInput('manifest-path')
   const overwrite: boolean = core.getInput('overwrite') === 'true'
@@ -22,6 +23,7 @@ export async function run() {
 
   core.info('Running action with inputs:')
   core.info(`\tAllow Prerelease: ${allowPrerelease}`)
+  core.info(`\tAPI URL: ${apiUrl}`)
   core.info(`\tCheck: ${checkOnly}`)
   core.info(`\tManifest Path: ${manifestPath}`)
   core.info(`\tOverwrite: ${overwrite}`)
