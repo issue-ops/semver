@@ -31242,7 +31242,9 @@ var githubExports = requireGithub();
  * @returns The ID of the previous version check comment, or undefined
  */
 async function getCommentId() {
-    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }));
+    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }), {
+        baseUrl: coreExports.getInput('api_url', { required: true })
+    });
     // Unique identifier for the version check comment.
     const identifier = `<!-- semver: workflow=${githubExports.context.workflow} -->`;
     // If no existing comment is found, set the result to undefined.
@@ -31264,7 +31266,9 @@ async function getCommentId() {
  * @param manifestPath The path to the manifest file being checked
  */
 async function versionCheckComment(success, manifestPath) {
-    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }));
+    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }), {
+        baseUrl: coreExports.getInput('api_url', { required: true })
+    });
     const successBody = [
         '### Semantic Version Check Passed :white_check_mark:',
         `Version in manifest file \`${manifestPath}\` is valid.`,

@@ -12,6 +12,10 @@ inputs:
       When `check-only` is set to 'true', this will allow prerelease versions to
       pass. Defaults to 'true'.
     required: false
+  api_url:
+    description: The GitHub API URL to use.
+    required: false
+    default: ${{ github.api_url }}
   check-only:
     default: 'false'
     description:
