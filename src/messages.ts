@@ -8,7 +8,12 @@ import * as github from '@actions/github'
  * @returns The ID of the previous version check comment, or undefined
  */
 export async function getCommentId(): Promise<number | undefined> {
-  const octokit = github.getOctokit(core.getInput('token', { required: true }))
+  const octokit = github.getOctokit(
+    core.getInput('token', { required: true }),
+    {
+      baseUrl: core.getInput('api_url', { required: true })
+    }
+  )
 
   // Unique identifier for the version check comment.
   const identifier = `<!-- semver: workflow=${github.context.workflow} -->`
@@ -38,7 +43,12 @@ export async function versionCheckComment(
   success: boolean,
   manifestPath: string
 ): Promise<void> {
-  const octokit = github.getOctokit(core.getInput('token', { required: true }))
+  const octokit = github.getOctokit(
+    core.getInput('token', { required: true }),
+    {
+      baseUrl: core.getInput('api_url', { required: true })
+    }
+  )
 
   const successBody = [
     '### Semantic Version Check Passed :white_check_mark:',

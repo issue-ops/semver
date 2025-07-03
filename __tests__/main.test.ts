@@ -46,6 +46,7 @@ describe('main', () => {
     core.getInput
       .mockReset()
       .mockReturnValueOnce('true') // allow-prerelease
+      .mockReturnValueOnce('https://api.github.com') // api_url
       .mockReturnValueOnce('false') // check-only
       .mockReturnValueOnce('/fixtures/valid/node/package.json') // manifest-path
       .mockReturnValueOnce('true') // overwrite
@@ -64,6 +65,7 @@ describe('main', () => {
     core.getInput
       .mockReset()
       .mockReturnValueOnce('true') // allow-prerelease
+      .mockReturnValueOnce('https://api.github.com') // api_url
       .mockReturnValueOnce('false') // check-only
       .mockReturnValueOnce('') // manifest-path
       .mockReturnValueOnce('true') // overwrite
@@ -83,6 +85,7 @@ describe('main', () => {
     core.getInput
       .mockReset()
       .mockReturnValueOnce('true') // allow-prerelease
+      .mockReturnValueOnce('https://api.github.com') // api_url
       .mockReturnValueOnce('false') // check-only
       .mockReturnValueOnce('/fixtures/valid/node/package.json') // manifest-path
       .mockReturnValueOnce('true') // overwrite
@@ -193,6 +196,7 @@ describe('main', () => {
     core.getInput
       .mockReset()
       .mockReturnValueOnce('true') // allow-prerelease
+      .mockReturnValueOnce('https://api.github.com') // api_url
       .mockReturnValueOnce('false') // check-only
       .mockReturnValueOnce('/fixtures/valid/node/package.json') // manifest-path
       .mockReturnValueOnce('false') // overwrite
@@ -226,6 +230,7 @@ describe('main', () => {
     core.getInput
       .mockReset()
       .mockReturnValueOnce('true') // allow-prerelease
+      .mockReturnValueOnce('https://api.github.com') // api_url
       .mockReturnValueOnce('true') // check-only
       .mockReturnValueOnce('/fixtures/valid/node/package.json') // manifest-path
       .mockReturnValueOnce('false') // overwrite

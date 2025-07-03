@@ -31242,7 +31242,9 @@ var githubExports = requireGithub();
  * @returns The ID of the previous version check comment, or undefined
  */
 async function getCommentId() {
-    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }));
+    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }), {
+        baseUrl: coreExports.getInput('api_url', { required: true })
+    });
     // Unique identifier for the version check comment.
     const identifier = `<!-- semver: workflow=${githubExports.context.workflow} -->`;
     // If no existing comment is found, set the result to undefined.
@@ -31264,7 +31266,9 @@ async function getCommentId() {
  * @param manifestPath The path to the manifest file being checked
  */
 async function versionCheckComment(success, manifestPath) {
-    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }));
+    const octokit = githubExports.getOctokit(coreExports.getInput('token', { required: true }), {
+        baseUrl: coreExports.getInput('api_url', { required: true })
+    });
     const successBody = [
         '### Semantic Version Check Passed :white_check_mark:',
         `Version in manifest file \`${manifestPath}\` is valid.`,
@@ -44800,6 +44804,7 @@ class Version {
 
 async function run() {
     const allowPrerelease = coreExports.getInput('allow-prerelease') === 'true';
+    const apiUrl = coreExports.getInput('api_url', { required: true });
     const checkOnly = coreExports.getInput('check-only') === 'true';
     const manifestPath = coreExports.getInput('manifest-path');
     const overwrite = coreExports.getInput('overwrite') === 'true';
@@ -44813,6 +44818,7 @@ async function run() {
         return coreExports.setFailed('Must provide manifest-path OR use-version');
     coreExports.info('Running action with inputs:');
     coreExports.info(`\tAllow Prerelease: ${allowPrerelease}`);
+    coreExports.info(`\tAPI URL: ${apiUrl}`);
     coreExports.info(`\tCheck: ${checkOnly}`);
     coreExports.info(`\tManifest Path: ${manifestPath}`);
     coreExports.info(`\tOverwrite: ${overwrite}`);
