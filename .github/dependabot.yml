@@ -9,8 +9,6 @@ updates:
       - dependabot
       - actions
     open-pull-requests-limit: 10
-    reviewers:
-      - issue-ops/maintainers
     groups:
       actions-minor:
         update-types:
@@ -25,8 +23,6 @@ updates:
       - dependabot
       - npm
     open-pull-requests-limit: 10
-    reviewers:
-      - issue-ops/maintainers
     groups:
       npm-development:
         dependency-type: development
