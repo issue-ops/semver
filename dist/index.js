@@ -44677,10 +44677,18 @@ class Version {
                 return body.match(regex)?.[0]?.replace('v', '');
             }
         };
+        // Functions for parsing manifest files with multiple possible file names
+        // (but the same extension)
+        const extensionParser = {
+            '.csproj': (body) => {
+                return new XMLParser().parse(body).Project?.PropertyGroup?.Version;
+            }
+        };
         try {
             coreExports.info(`Reading manifest: ${workspace}/${manifestPath}`);
             const body = require$$1.readFileSync(`${workspace}/${manifestPath}`, 'utf8');
-            const version = parser[manifestFile]?.(body);
+            const version = parser[manifestFile]?.(body) ||
+                extensionParser[manifestFile.slice(manifestFile.lastIndexOf('.'))]?.(body);
             coreExports.info(`Inferred version: ${version}`);
             // Return undefined if no version was found, otherwise return a new
             // instance of the Version class
