@@ -14,16 +14,17 @@
 Gets the [Semantic Version](https://semver.org/) of a repository based on the
 type of manifest file located. This action currently supports the following:
 
-| Language                   | Manifest File    |
-| -------------------------- | ---------------- |
-| Dart                       | `pubspec.yaml`   |
-| GitHub Actions (Container) | `action.yml`     |
-| Java                       | `pom.xml`        |
-| Node.js                    | `package.json`   |
-| Python                     | `pyproject.toml` |
-|                            | `setup.cfg`      |
-|                            | `setup.py`       |
-| _Other_                    | `.version`       |
+| Language                   | Manifest File      |
+| -------------------------- | ------------------ |
+| C#                         | `<project>.csproj` |
+| Dart                       | `pubspec.yaml`     |
+| GitHub Actions (Container) | `action.yml`       |
+| Java                       | `pom.xml`          |
+| Node.js                    | `package.json`     |
+| Python                     | `pyproject.toml`   |
+|                            | `setup.cfg`        |
+|                            | `setup.py`         |
+| _Other_                    | `.version`         |
 
 > [!TIP]
 >

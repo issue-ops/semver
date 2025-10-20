@@ -164,11 +164,25 @@ export class Version {
       }
     }
 
+    // Functions for parsing manifest files with multiple possible file names
+    // (but the same extension)
+    const extensionParser: {
+      [k: string]: (body: string) => string | undefined
+    } = {
+      '.csproj': (body: string): string | undefined => {
+        return new XMLParser().parse(body).Project?.PropertyGroup?.Version
+      }
+    }
+
     try {
       core.info(`Reading manifest: ${workspace}/${manifestPath}`)
 
       const body = fs.readFileSync(`${workspace}/${manifestPath}`, 'utf8')
-      const version = parser[manifestFile]?.(body)
+      const version =
+        parser[manifestFile]?.(body) ||
+        extensionParser[manifestFile.slice(manifestFile.lastIndexOf('.'))]?.(
+          body
+        )
 
       core.info(`Inferred version: ${version}`)
 

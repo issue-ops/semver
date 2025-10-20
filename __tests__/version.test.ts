@@ -115,6 +115,12 @@ describe('version.ts', () => {
         __dirname
       )?.toString()
     ).toEqual('1.2.3-alpha.4+build.5')
+    expect(
+      Version.infer(
+        '../__fixtures__/valid/csharp/example.csproj',
+        __dirname
+      )?.toString()
+    ).toEqual('1.2.3-alpha.4+build.5')
   })
 
   it('Does not infer the version from invalid manifests', async () => {
@@ -155,6 +161,12 @@ describe('version.ts', () => {
     expect(
       Version.infer(
         '../__fixtures__/invalid/dart/pubspec.yaml',
+        __dirname
+      )?.toString()
+    ).toEqual(undefined)
+    expect(
+      Version.infer(
+        '../__fixtures__/invalid/csharp/example.csproj',
         __dirname
       )?.toString()
     ).toEqual(undefined)
