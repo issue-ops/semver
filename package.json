@@ -43,7 +43,7 @@
     "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.1",
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "fast-xml-parser": "^5.2.5",
     "toml": "^3.0.0",
     "yaml": "^2.8.1"
