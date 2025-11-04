@@ -19,3 +19,6 @@ Thumbs.db
 tmp/
 linter/
 .env
+obj
+bin
+*.sln
