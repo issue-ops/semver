@@ -45,7 +45,7 @@
     "@actions/github": "^9.0.0",
     "@octokit/rest": "^22.0.1",
     "fast-xml-parser": "^5.5.7",
-    "toml": "^3.0.0",
+    "toml": "^4.1.1",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
