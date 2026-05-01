@@ -40,13 +40,13 @@
     "outputName": "jest-junit.xml"
   },
   "dependencies": {
-    "@actions/core": "^3.0.0",
+    "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
     "@actions/github": "^9.0.0",
     "@octokit/rest": "^22.0.1",
     "fast-xml-parser": "^5.5.7",
     "toml": "^3.0.0",
-    "yaml": "^2.8.2"
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
